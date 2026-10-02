@@ -165,11 +165,41 @@
   main { transition: opacity .9s ease, transform .9s ease; }
   body.splash main { opacity: 0; transform: translateY(16px); pointer-events: none; }
   body.splash { overflow: hidden; }
+
+  /* ---------- password gate ---------- */
+  .gate { position: fixed; top: 0; left: 0; right: 0; height: 100vh; z-index: 80; display: none; align-items: center; justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)); text-align: center;
+    background: radial-gradient(ellipse at 50% 30%, rgba(46, 24, 70, .55), rgba(5, 3, 10, .92) 70%); }
+  @supports (height: 100lvh) { .gate { height: 100lvh; } }
+  body.locked .gate { display: flex; }
+  .gate.leaving { animation: gateout .7s ease forwards; }
+  @keyframes gateout { to { opacity: 0; transform: scale(1.04); } }
+  .gate-box { width: min(100%, 380px); }
+  .gate-moon { width: 120px; height: 120px; margin: 0 auto 26px; border-radius: 50%;
+    background: radial-gradient(circle at 40% 36%, #FFF4D6, #F8DC9C 45%, #EDB06A 80%, #D98A4C);
+    box-shadow: 0 0 60px rgba(246, 196, 126, .55), 0 0 160px rgba(232, 131, 74, .35); animation: moonpulse 4s ease-in-out infinite; }
+  @keyframes moonpulse { 50% { box-shadow: 0 0 80px rgba(246, 196, 126, .7), 0 0 200px rgba(232, 131, 74, .45); } }
+  .gate h2 { margin: 0; font: 700 clamp(34px, 10vw, 44px)/1.05 'Grenze Gotisch', serif; color: #FFF0D6; text-shadow: 0 0 22px rgba(232, 131, 74, .6); }
+  .gate p { margin: 10px 0 22px; color: var(--soft); font-size: 19px; }
+  .gate form { display: grid; gap: 12px; }
+  .pw { position: relative; }
+  .pw input { width: 100%; height: 58px; border-radius: 999px; border: 1.5px solid rgba(241, 230, 208, .4); background: rgba(10, 7, 23, .7);
+    color: var(--cream); text-align: center; font: 700 24px 'Cinzel', serif; letter-spacing: 8px; padding: 0 52px; outline: none;
+    -webkit-appearance: none; appearance: none; }
+  .pw input::placeholder { letter-spacing: 3px; font-size: 15px; color: rgba(241, 230, 208, .45); }
+  .pw input:focus { border-color: #E8834A; box-shadow: 0 0 0 4px rgba(232, 131, 74, .2); }
+  .pw button { position: absolute; right: 8px; top: 8px; width: 42px; height: 42px; border: 0; border-radius: 50%; background: transparent; color: var(--soft); cursor: pointer; }
+  .pw button svg { width: 20px; height: 20px; }
+  .gate .btn { width: 100%; }
+  .gate .gate-msg { min-height: 1.5em; margin: 6px 0 0; font-size: 18px; color: #FF8A7A; font-weight: 600; }
+  .gate .gate-msg.ok { color: #9BE07A; }
+  .shake { animation: shake .45s ease; }
+  @keyframes shake { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
   body.splash .graveyard { opacity: 0; transform: translateY(30%); }
   @media (prefers-reduced-motion: reduce) { .spider, .pk-face, .pk-glow { animation: none; } }
 </style>
 </head>
-<body class="splash">
+<body class="splash locked">
 <canvas id="bg" aria-hidden="true"></canvas>
 <svg class="web l" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
 <svg class="web r" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
@@ -201,6 +231,21 @@
   <button class="vbtn v-prev" id="v-prev" type="button" aria-label="Previous card">‹</button>
   <button class="vbtn v-next" id="v-next" type="button" aria-label="Next card">›</button>
   <p class="v-label" id="v-label"></p>
+</div>
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate-box">
+    <div class="gate-moon" aria-hidden="true"></div>
+    <h2 id="gate-title">Speak the password</h2>
+    <p>Only the summoned may enter.</p>
+    <form id="gate-form" autocomplete="off">
+      <div class="pw">
+        <input id="gate-input" type="password" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="ENTER PASSWORD" aria-label="Password" required>
+        <button type="button" id="gate-eye" aria-label="Show password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+      <button class="btn primary" type="submit" id="gate-go">Enter</button>
+    </form>
+    <p class="gate-msg" id="gate-msg" role="alert" aria-live="assertive"></p>
+  </div>
 </div>
 <main>
   <div class="hero">
@@ -480,7 +525,57 @@ function enter() {
   if (!reduceMotion) { c.clock = null; c.at = 1.0; } // the card lights up and its text appears
   c.card.ready.then(run);
 }
-PageIntro.splash(5, enter);
+/* ---------- password gate ----------
+   Only a salted PBKDF2-SHA256 hash of the password is stored here, never the password itself.
+   To change the password, generate a new hash:
+     node -e "const c=require('crypto'),s=c.randomBytes(16);console.log(s.toString('hex'),c.pbkdf2Sync('NEW-PASSWORD',s,310000,32,'sha256').toString('hex'))"
+   and paste the two values below. */
+const GATE = {
+  salt: '9e7c92c298f50881d3292a19e3b6eef0',
+  iterations: 310000,
+  hash: 'dd6ecaf4437356c9f3cecf8e68d2e5642a370d01194646c6e712c15418ac7e3f',
+};
+const hex = b => [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+const unhex = h => new Uint8Array(h.match(/../g).map(x => parseInt(x, 16)));
+async function checkPassword(pw) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: unhex(GATE.salt), iterations: GATE.iterations }, key, 256);
+  const got = hex(bits);
+  let diff = 0;
+  for (let i = 0; i < got.length; i++) diff |= got.charCodeAt(i) ^ GATE.hash.charCodeAt(i);
+  return diff === 0 && got.length === GATE.hash.length;
+}
+let fails = 0, lockedUntil = 0;
+$('gate-eye').addEventListener('click', () => {
+  const i = $('gate-input'), show = i.type === 'password';
+  i.type = show ? 'text' : 'password';
+  $('gate-eye').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  i.focus();
+});
+$('gate-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const input = $('gate-input'), msg = $('gate-msg'), go = $('gate-go');
+  if (Date.now() < lockedUntil) { msg.textContent = 'Too many tries. Wait a moment…'; return; }
+  if (!window.crypto || !crypto.subtle) { msg.textContent = 'Please open this link in a modern browser (https).'; return; }
+  go.disabled = true; go.textContent = 'Checking…'; msg.className = 'gate-msg'; msg.textContent = '';
+  let ok = false;
+  try { ok = await checkPassword(input.value.trim()); } catch (err) { ok = false; }
+  go.disabled = false; go.textContent = 'Enter';
+  if (ok) {
+    msg.className = 'gate-msg ok'; msg.textContent = 'The doors creak open…';
+    input.blur();
+    $('gate').classList.add('leaving');
+    setTimeout(() => { document.body.classList.remove('locked'); PageIntro.splash(5, enter); }, 650);
+  } else {
+    fails++;
+    if (fails >= 5) { lockedUntil = Date.now() + 5000 * (fails - 4); }
+    msg.textContent = 'Wrong password. Try again.';
+    const box = document.querySelector('.gate-box');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    input.value = ''; input.focus();
+  }
+});
+setTimeout(() => $('gate-input').focus(), 300);
 
 $('replay').addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
