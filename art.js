@@ -51,6 +51,51 @@
       accent: '#FFB347', soft: '#F2DCC4', title: ['#FFF6E2', '#FFD08A'], titleGlow: '#FF5A1F', bat: '#080104',
       webs: false, spider: false, cloud: '#2B0A0E',
     },
+    grave: {
+      name: 'The Restless Graveyard',
+      sky: ['#050A16', '#0B1830', '#13284A', '#1E3A60', '#2A4A70'],
+      moon: { x: 540, y: 690, r: 225, c: ['#F6FAFF', '#DCE8FA', '#AFC6E8', '#839FCB'], crater: '#90A8CE', glow: ['#D2E2FF', '#6F8FD0'] },
+      horizon: '#7FA6E6', far: '#1A2C4A', back: '#12213A', mid: '#0B1628', sil: '#050A14',
+      ground: ['#0E1A2E', '#070D18', '#03060C'], fog: ['#D6E4FF', '#A8C0F0'],
+      accent: '#9EC4FF', soft: '#DCE6F5', title: ['#F4F8FF', '#BFD4F5'], titleGlow: '#4F7FD9', bat: '#02040A',
+      webs: false, spider: false, cloud: '#0A1426',
+    },
+    vamp: {
+      name: 'The Vampire\u2019s Castle',
+      sky: ['#0A0204', '#1E0408', '#3A0710', '#5A0E16', '#6E1219'],
+      moon: { x: 360, y: 640, r: 195, c: ['#FFE0D4', '#F7A08A', '#D24A3C', '#8E1E1C'], crater: '#A8322A', glow: ['#FF8A70', '#C21E1E'] },
+      horizon: '#E0402E', far: '#3A0A10', back: '#26060B', mid: '#160307', sil: '#080103',
+      ground: ['#1A0408', '#0C0204', '#050102'], fog: ['#F0B0B8', '#C88090'],
+      accent: '#FF7A7A', soft: '#F2D8D8', title: ['#FFF0EC', '#FFB3A6'], titleGlow: '#D21E2E', bat: '#050001',
+      webs: false, spider: false, cloud: '#1A0306',
+    },
+    forest: {
+      name: 'The Whispering Woods',
+      sky: ['#02080C', '#061820', '#0B2A33', '#123A40', '#1A4A48'],
+      moon: { x: 540, y: 640, r: 190, c: ['#F5FFF8', '#D2F0E0', '#9ED2BC', '#6AA894'], crater: '#7EB8A2', glow: ['#BFF5DA', '#4FA88A'] },
+      horizon: '#5FC0A0', far: '#0F2C30', back: '#0A2024', mid: '#061518', sil: '#020809',
+      ground: ['#071A1C', '#040D0F', '#020607'], fog: ['#C8F0E0', '#90D0BA'],
+      accent: '#7FE8C8', soft: '#D6EEE6', title: ['#F0FFF8', '#A8E8D0'], titleGlow: '#2FA88A', bat: '#010405',
+      webs: true, spider: true, cloud: null,
+    },
+    ship: {
+      name: 'The Ghost Ship',
+      sky: ['#02060E', '#06122A', '#0C2042', '#163058', '#1F3C66'],
+      moon: { x: 700, y: 640, r: 180, c: ['#FFFDF0', '#F2EFD6', '#CFCBAA', '#A8A27E'], crater: '#B5AF8A', glow: ['#F0EFD0', '#8A9AC0'] },
+      horizon: '#6F8FC0', far: '#0E1A30', back: '#0A1426', mid: '#06101E', sil: '#02060C',
+      ground: ['#0A1830', '#050C1A', '#02050C'], fog: ['#CCE0F0', '#9AB4D8'],
+      accent: '#8FD8FF', soft: '#D8E4F0', title: ['#F4FAFF', '#BCD8F0'], titleGlow: '#3F7FC0', bat: '#01030A',
+      webs: false, spider: false, cloud: '#08132A',
+    },
+    carnival: {
+      name: 'The Haunted Carnival',
+      sky: ['#0A0414', '#1C0A2E', '#33124A', '#4E1A5C', '#64205E'],
+      moon: { x: 720, y: 600, r: 190, c: ['#FFF2FA', '#F6D2EA', '#D9A0C8', '#B070A0'], crater: '#C080B0', glow: ['#FFC8EC', '#C04FA0'] },
+      horizon: '#E060B0', far: '#2E1240', back: '#220C30', mid: '#160820', sil: '#08030E',
+      ground: ['#1A0A26', '#0D0514', '#06020A'], fog: ['#F0C8F0', '#C890D0'],
+      accent: '#FF8AD8', soft: '#F0DCEC', title: ['#FFF2FA', '#FFB8E6'], titleGlow: '#D03FA0', bat: '#04010A',
+      webs: false, spider: false, cloud: null,
+    },
   };
 
   function rng(seed) {
@@ -129,6 +174,23 @@
         <stop offset="0" stop-color="#C8FF8A" stop-opacity="0.65"/><stop offset="0.4" stop-color="#5FD86A" stop-opacity="0.22"/>
         <stop offset="1" stop-color="#3FBF5A" stop-opacity="0"/>
       </radialGradient>
+      <radialGradient id="${id('accentGlow')}">
+        <stop offset="0" stop-color="${T.accent}" stop-opacity="0.65"/><stop offset="0.4" stop-color="${T.accent}" stop-opacity="0.2"/>
+        <stop offset="1" stop-color="${T.accent}" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="${id('redGlow')}">
+        <stop offset="0" stop-color="#FF6A4A" stop-opacity="0.6"/><stop offset="0.4" stop-color="#E8302A" stop-opacity="0.2"/>
+        <stop offset="1" stop-color="#E8302A" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="${id('sea')}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1A2E52"/><stop offset="0.12" stop-color="#0C1A34"/><stop offset="0.4" stop-color="#050C1A"/><stop offset="1" stop-color="#02050C"/>
+      </linearGradient>
+      <linearGradient id="${id('beam')}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#FFF6D0" stop-opacity="0.55"/><stop offset="1" stop-color="#FFF6D0" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="${id('darken')}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="${T.ground[1]}" stop-opacity="0"/><stop offset="0.25" stop-color="${T.ground[1]}" stop-opacity="0.85"/><stop offset="1" stop-color="${T.ground[2]}"/>
+      </linearGradient>
       <radialGradient id="${id('brew')}" cx="0.5" cy="0.4" r="0.6">
         <stop offset="0" stop-color="#EFFFC2"/><stop offset="0.45" stop-color="#9BEA6E"/><stop offset="1" stop-color="#2E8A4A"/>
       </radialGradient>
@@ -582,7 +644,370 @@
       pumpkin(894, 1186, 0.98, 3);
     }
 
-    ({ manor: sceneManor, witch: sceneWitch, patch: scenePatch })[theme]();
+
+    /* ---------- shared bits for the newer scenes ---------- */
+    function fireflies(n, seed, x0, x1, y0, y1, core) {
+      const ff = el('g'), flies = [], R = rng(seed);
+      for (let i = 0; i < n; i++) flies.push({ g: el('circle', { r: 10, fill: url('accentGlow') }, ff), d: el('circle', { r: 2.2, fill: core }, ff),
+        x: x0 + R() * (x1 - x0), y: y0 + R() * (y1 - y0), ax: 20 + R() * 40, ay: 10 + R() * 30, k: 0.1 + R() * 0.2, ph: R() * TAU });
+      anim.push(t => {
+        for (const f of flies) {
+          const x = f.x + f.ax * Math.sin(TAU * f.k * t + f.ph), y = f.y + f.ay * Math.sin(TAU * f.k * 1.7 * t + f.ph * 2);
+          const o = f2(0.3 + 0.7 * Math.max(0, Math.sin(TAU * f.k * 3 * t + f.ph)));
+          for (const n of [f.g, f.d]) { n.setAttribute('cx', f2(x)); n.setAttribute('cy', f2(y)); n.setAttribute('opacity', o); }
+        }
+      });
+    }
+    function candleFlame(cx, base, h, w, ph, parent) {
+      const glow = el('circle', { cx, cy: base - h * 0.6, r: h * 2.2, fill: url('glow') }, parent);
+      const f = el('path', { d: flamePath(cx, base, h, w), fill: '#F7A04A' }, parent);
+      const fi = el('path', { d: flamePath(cx, base - 1, h * 0.55, w * 0.5), fill: '#FFF0B8' }, parent);
+      anim.push(t => {
+        const sy = 1 + 0.12 * Math.sin(TAU * 3 * t + ph) + 0.06 * Math.sin(TAU * 7 * t + ph * 2);
+        const sk = 6 * Math.sin(TAU * 2 * t + ph);
+        const tr = `translate(${cx},${base}) skewX(${f2(sk)}) scale(${f2(1 - 0.06 * Math.sin(TAU * 5 * t + ph))},${f2(sy)}) translate(${-cx},${-base})`;
+        f.setAttribute('transform', tr); fi.setAttribute('transform', tr);
+        glow.setAttribute('opacity', f2(0.7 + 0.3 * Math.sin(TAU * 3 * t + ph)));
+      });
+    }
+    const GHOST = 'M-22,10 C-24,-34 24,-34 22,10 Q22,30 15,32 Q11,24 7,32 Q2,24 -3,32 Q-8,24 -12,32 Q-20,30 -22,10Z';
+
+    function sceneGrave() {
+      hills();
+      // mausoleum against the moon
+      const mz = el('g', { fill: T.far });
+      el('path', { d: 'M440,962 L440,868 L640,868 L640,962Z M428,872 L540,808 L652,872Z M420,872 L660,872 L660,880 L420,880Z' }, mz);
+      for (const x of [458, 498, 582, 622]) el('rect', { x: x - 6, y: 884, width: 12, height: 76, fill: T.back }, mz);
+      const door = el('path', { d: 'M524,962 L524,918 A16,16 0 0 1 556,918 L556,962Z', fill: '#BFD8FF', opacity: 0.5 }, mz);
+      el('path', { d: 'M540,808 L540,786 M530,796 L550,796', stroke: T.far, 'stroke-width': 4 }, mz);
+      anim.push(t => door.setAttribute('opacity', f2(0.35 + 0.15 * Math.sin(TAU * t / 3))));
+      backHill();
+      midHill();
+      graves([[110, 1060, 26, 40, -6], [170, 1050, 22, 32, 4], [236, 1044, 30, 44, -3], [846, 1044, 28, 42, 5], [910, 1050, 22, 30, -4], [970, 1060, 26, 38, 3], [430, 1032, 20, 28, 6], [650, 1030, 22, 30, -5]],
+             [[290, 1040, 0.9, 6], [790, 1040, 0.9, -5], [600, 1024, 0.6, 3]]);
+      // ghosts drifting up from the graves
+      const gg = el('g');
+      const ghosts = [[236, 1010, 0], [846, 1000, 0.33], [430, 1000, 0.66], [970, 1020, 0.5]].map(([x, y, ph], i) => {
+        const g = el('g', {}, gg);
+        el('circle', { cx: 0, cy: 0, r: 60, fill: url('accentGlow') }, g);
+        el('path', { d: GHOST, fill: '#EAF2FF' }, g);
+        el('ellipse', { cx: -8, cy: -8, rx: 3.4, ry: 5, fill: '#0B1628' }, g);
+        el('ellipse', { cx: 8, cy: -8, rx: 3.4, ry: 5, fill: '#0B1628' }, g);
+        el('ellipse', { cx: 0, cy: 5, rx: 4, ry: 5.5, fill: '#0B1628' }, g);
+        return { g, x, y, ph, p: 6.5 + i * 0.7 };
+      });
+      anim.push(t => {
+        for (const h of ghosts) {
+          const u = (t / h.p + h.ph) % 1;
+          const x = h.x + 28 * Math.sin(u * TAU * 1.5), y = h.y - u * 300, s = 0.55 + u * 0.6;
+          h.g.setAttribute('transform', `translate(${f2(x)},${f2(y)}) rotate(${f2(8 * Math.sin(u * TAU * 2))}) scale(${f2(s)})`);
+          h.g.setAttribute('opacity', f2(0.62 * Math.sin(Math.PI * u)));
+        }
+      });
+      fogBand(1045, 7, 3, 70, 14, 1);
+      tree(70, 1215, 61, 1, 0.8);
+      // iron gate between two stone pillars
+      const gate = el('g', { fill: T.sil, stroke: T.sil });
+      const ay = x => { const s = (x - 362) / 356; return 905 - 230 * s * (1 - s); };
+      for (let x = 372; x <= 708; x += 24) {
+        if (Math.abs(x - 540) < 6) continue;
+        el('path', { d: `M${x},${f2(ay(x) + 4)} L${x},1170`, 'stroke-width': 5, fill: 'none' }, gate);
+        el('path', { d: `M${x - 6},${f2(ay(x) + 8)} L${x},${f2(ay(x) - 10)} L${x + 6},${f2(ay(x) + 8)}Z`, stroke: 'none' }, gate);
+      }
+      el('path', { d: 'M540,850 L540,1170', 'stroke-width': 7, fill: 'none' }, gate);
+      el('path', { d: 'M362,905 Q540,675 718,905', fill: 'none', 'stroke-width': 9 }, gate);
+      el('path', { d: 'M362,925 Q540,715 718,925', fill: 'none', 'stroke-width': 4 }, gate);
+      el('path', { d: 'M362,980 L718,980 M362,1120 L718,1120', 'stroke-width': 6, fill: 'none' }, gate);
+      for (const x of [420, 480, 600, 660]) el('circle', { cx: x, cy: 1050, r: 18, fill: 'none', 'stroke-width': 4 }, gate);
+      el('path', { d: 'M540,790 L540,742 M524,758 L556,758', 'stroke-width': 6, fill: 'none' }, gate);
+      for (const x of [300, 720]) {
+        el('rect', { x, y: 830, width: 62, height: 360, stroke: 'none' }, gate);
+        el('rect', { x: x - 8, y: 818, width: 78, height: 16, stroke: 'none' }, gate);
+        el('rect', { x: x - 4, y: 900, width: 70, height: 8, stroke: 'none' }, gate);
+      }
+      // blue lanterns on the pillars
+      for (const [x, ph] of [[331, 0], [751, 2]]) {
+        const lg = el('g');
+        const glow = el('circle', { cx: x, cy: 790, r: 80, fill: url('accentGlow') }, lg);
+        el('path', { d: `M${x - 12},818 L${x + 12},818 L${x + 14},780 L${x - 14},780Z`, fill: '#CFE2FF', opacity: 0.85 }, lg);
+        el('path', { d: `M${x - 12},818 L${x + 12},818 L${x + 14},780 L${x - 14},780Z M${x},780 L${x},818 M${x - 18},780 L${x + 18},780 L${x},764Z`, fill: 'none', stroke: T.sil, 'stroke-width': 3 }, lg);
+        anim.push(t => glow.setAttribute('opacity', f2(0.7 + 0.3 * Math.sin(TAU * 1.3 * t + ph))));
+      }
+      // fences either side
+      const fence = el('g', { fill: T.sil });
+      for (const [a, b] of [[34, 300], [782, 1046]]) {
+        for (let x = a; x <= b; x += 26) { el('rect', { x: x - 2.5, y: 1010, width: 5, height: 170 }, fence); el('path', { d: `M${x - 6},1016 L${x},998 L${x + 6},1016Z` }, fence); }
+        el('rect', { x: a - 4, y: 1030, width: b - a + 8, height: 5 }, fence);
+        el('rect', { x: a - 4, y: 1140, width: b - a + 8, height: 5 }, fence);
+      }
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.5);
+    }
+
+    function sceneVamp() {
+      // lightning lights the sky behind the silhouettes
+      const flash = el('rect', { width: W, height: 1200, fill: '#FFE3E3', opacity: 0 });
+      const bolt = el('path', { d: 'M820,0 L790,120 L830,130 L770,300 L812,306 L740,470 M790,300 L860,360', fill: 'none', stroke: '#FFF4F0', 'stroke-width': 4, 'stroke-linejoin': 'round', opacity: 0 });
+      const strike = t => { const c = t % 7.5; return (c > 4.6 && c < 4.7) || (c > 4.82 && c < 5.0) ? (c < 4.7 ? 1 : 0.7) : 0; };
+      anim.push(t => { const v = strike(t); flash.setAttribute('opacity', f2(v * 0.32)); bolt.setAttribute('opacity', f2(v)); });
+      el('path', { d: 'M0,980 C150,950 260,965 380,975 C500,985 620,955 760,960 C900,965 980,985 1080,970 L1080,1200 L0,1200Z', fill: T.far });
+      // cliffs and the bridge
+      el('path', { d: 'M0,712 L170,720 L178,760 L192,770 L196,820 L214,850 L216,910 L236,1000 L0,1000Z', fill: T.mid });
+      el('path', { d: 'M1080,690 L980,684 C900,692 860,730 820,756 L690,770 L676,800 L662,806 L650,850 L636,862 L626,910 L606,930 L596,980 L570,1000 L540,1050 L1080,1050Z', fill: T.mid });
+      const br = el('g', { fill: T.mid });
+      el('rect', { x: 170, y: 712, width: 530, height: 18 }, br);
+      for (let i = 0; i < 4; i++) {
+        const x = 236 + i * 118;
+        el('path', { d: `M${x},730 L${x + 118},730 L${x + 118},${i === 3 ? 760 : 900} L${x + 104},${i === 3 ? 760 : 900} L${x + 104},790 A45,45 0 0 0 ${x + 14},790 L${x + 14},900 L${x},900Z` }, br);
+      }
+      for (let x = 176; x <= 694; x += 18) el('rect', { x, y: 700, width: 4, height: 14 }, br);
+      // the castle
+      const c = el('g', { fill: T.sil });
+      el('rect', { x: 760, y: 560, width: 150, height: 210 }, c);
+      for (let x = 760; x < 910; x += 20) el('rect', { x, y: 548, width: 12, height: 14 }, c);
+      el('rect', { x: 700, y: 610, width: 56, height: 160 }, c); el('path', { d: 'M692,614 L728,486 L764,614Z' }, c);
+      el('rect', { x: 906, y: 520, width: 64, height: 250 }, c); el('path', { d: 'M898,524 L938,370 L978,524Z' }, c);
+      el('rect', { x: 812, y: 470, width: 44, height: 92 }, c); el('path', { d: 'M806,474 L834,330 L862,474Z' }, c);
+      el('path', { d: 'M834,334 L834,300 M834,306 L858,312 L834,320Z', stroke: T.sil, 'stroke-width': 3 }, c);
+      el('rect', { x: 964, y: 640, width: 60, height: 130 }, c); el('path', { d: 'M958,644 L994,560 L1030,644Z' }, c);
+      for (const [x, y] of [[790, 600], [830, 640], [870, 600], [728, 650], [938, 580], [938, 660], [834, 500], [994, 680], [790, 700], [870, 700]]) lightWindow(x, y, 14, 26, c, windows, url('win'), url('redGlow'));
+      flickerWindows();
+            midHill();
+      graves([[120, 1060, 26, 40, -6], [960, 1060, 26, 38, 3], [880, 1050, 22, 30, -4]], [[200, 1046, 1, 6]]);
+      fogBand(1050, 7, 3, 70, 14, 0.9);
+      tree(60, 1215, 77, 1, 0.85);
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.4);
+      // candelabras
+      for (const [x, s] of [[190, 1], [890, 0.9]]) {
+        const g = el('g', { fill: T.sil, transform: `translate(${x},1188) scale(${s})` });
+        el('path', { d: 'M-4,0 L-4,-110 L4,-110 L4,0Z M-26,0 L26,0 L18,-10 L-18,-10Z M-50,-110 Q0,-70 50,-110 L50,-104 Q0,-62 -50,-104Z' }, g);
+        for (const dx of [-50, 0, 50]) {
+          el('rect', { x: dx - 9, y: (dx ? -160 : -175), width: 18, height: dx ? 50 : 65, fill: '#E9DCC4' }, g);
+          el('rect', { x: dx - 13, y: -112, width: 26, height: 6 }, g);
+          candleFlame(dx, dx ? -162 : -177, 30, 9, dx * 0.05 + x, g);
+        }
+      }
+    }
+
+    function sceneForest() {
+      const R = rng(808);
+      // three depths of trunks
+      const layer = (n, color, w0, w1, top0, top1, seed) => {
+        const g = el('g', { fill: color }), Rl = rng(seed);
+        for (let i = 0; i < n; i++) {
+          const x = (i + Rl() * 0.8) * (W / n), w = w0 + Rl() * (w1 - w0), top = top0 + Rl() * (top1 - top0), lean = (Rl() - 0.5) * 30;
+          el('path', { d: `M${f2(x - w / 2)},1200 L${f2(x - w * 0.3 + lean)},${f2(top)} L${f2(x + w * 0.3 + lean)},${f2(top)} L${f2(x + w / 2)},1200Z` }, g);
+          for (let k = 0; k < 3; k++) {
+            const by = top + 60 + Rl() * 300, dir = Rl() < 0.5 ? -1 : 1, len = 40 + Rl() * 90;
+            el('path', { d: `M${f2(x + lean * 0.5)},${f2(by)} Q${f2(x + dir * len * 0.6)},${f2(by - 20)} ${f2(x + dir * len)},${f2(by - 50 - Rl() * 30)} L${f2(x + dir * len)},${f2(by - 46 - Rl() * 30)} Q${f2(x + dir * len * 0.5)},${f2(by - 8)} ${f2(x + lean * 0.5)},${f2(by + 8)}Z` }, g);
+          }
+        }
+      };
+      layer(14, T.far, 14, 26, 380, 560, 3);
+      fogBand(930, 6, 21, 60, 16, 0.8);
+      layer(9, T.back, 28, 46, 300, 480, 5);
+      // glowing eyes in the dark
+      const eyes = [];
+      for (const [x, y, s] of [[150, 880, 1], [330, 960, 0.8], [700, 900, 0.9], [905, 970, 1], [470, 1060, 0.7], [800, 1080, 0.8], [240, 1100, 0.9]]) {
+        const g = el('g', { transform: `translate(${x},${y}) scale(${s})` });
+        el('circle', { cx: 0, cy: 0, r: 30, fill: url('accentGlow'), opacity: 0.5 }, g);
+        const lid = el('g', { fill: '#FFE27A' }, g);
+        el('ellipse', { cx: -9, cy: 0, rx: 5, ry: 3.6 }, lid);
+        el('ellipse', { cx: 9, cy: 0, rx: 5, ry: 3.6 }, lid);
+        eyes.push({ g, lid, ph: R() * 10, p: 5 + R() * 4 });
+      }
+      anim.push(t => {
+        for (const e of eyes) {
+          const c = (t + e.ph) % e.p;
+          const on = c < e.p - 1.2 ? 1 : 0;
+          const blink = (c % 2.7) > 2.55 ? 0.1 : 1;
+          e.g.setAttribute('opacity', on ? f2(Math.min(1, c * 2)) : 0);
+          e.lid.setAttribute('transform', `scale(1,${blink})`);
+        }
+      });
+      midHill();
+      layer(4, T.sil, 50, 70, 200, 320, 9);
+      // big framing trunks + the owl's branch
+      el('path', { d: 'M0,1220 L0,0 L70,0 C80,300 96,700 120,1220Z M1080,1220 L1080,0 L1010,0 C1000,300 984,700 960,1220Z', fill: T.sil });
+      el('path', { d: 'M90,780 C170,760 260,748 360,752 L362,760 C270,764 180,780 96,806Z', fill: T.sil });
+      const owl = el('g', { fill: T.sil, transform: 'translate(300,752)' });
+      el('path', { d: 'M-24,0 C-30,-30 -26,-58 -14,-70 L-18,-88 L-6,-76 C-2,-77 2,-77 6,-76 L18,-88 L14,-70 C26,-58 30,-30 24,0Z' }, owl);
+      el('path', { d: 'M-8,0 L-10,8 M8,0 L10,8', stroke: T.sil, 'stroke-width': 3 }, owl);
+      const owlEyes = el('g', {}, owl);
+      for (const dx of [-8, 8]) { el('circle', { cx: dx, cy: -58, r: 8, fill: '#FFC24A' }, owlEyes); el('circle', { cx: dx, cy: -58, r: 3.6, fill: '#140A02', class: 'pupil' }, owlEyes); }
+      const owlLid = el('g', {}, owl);
+      const lids = [-8, 8].map(dx => el('rect', { x: dx - 9, y: -67, width: 18, height: 0, fill: T.sil }, owlLid));
+      anim.push(t => {
+        const look = Math.sin(TAU * t / 6) * 3;
+        owlEyes.setAttribute('transform', `translate(${f2(look)},0)`);
+        const c = t % 3.7, b = c > 3.45 ? Math.sin(Math.PI * (c - 3.45) / 0.25) * 18 : 0;
+        lids.forEach(l => l.setAttribute('height', f2(b)));
+      });
+      // glowing mushrooms
+      const mush = el('g');
+      for (const [x, y, s] of [[150, 1180, 1], [190, 1188, 0.7], [860, 1176, 0.9], [910, 1186, 0.6], [540, 1176, 0.75]]) {
+        const g = el('g', { transform: `translate(${x},${y}) scale(${s})` }, mush);
+        const glow = el('circle', { cx: 0, cy: -24, r: 70, fill: url('accentGlow') }, g);
+        el('path', { d: 'M-6,0 L-4,-26 L4,-26 L6,0Z', fill: '#CFF5E6' }, g);
+        el('path', { d: 'M-24,-24 C-24,-48 24,-48 24,-24 Q0,-18 -24,-24Z', fill: '#7FE8C8' }, g);
+        for (const [dx, dy] of [[-10, -34], [6, -38], [14, -28]]) el('circle', { cx: dx, cy: dy, r: 2.6, fill: '#E8FFF6' }, g);
+        const ph = x * 0.01;
+        anim.push(t => glow.setAttribute('opacity', f2(0.6 + 0.4 * Math.sin(TAU * t / 2.4 + ph))));
+      }
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.5);
+      fireflies(16, 31, 140, 940, 820, 1170, '#E8FFF4');
+    }
+
+    function sceneShip() {
+      const HZ = 985;
+      el('path', { d: `M0,${HZ} L0,930 C60,915 140,925 210,945 C260,958 300,970 340,${HZ}Z`, fill: T.far });
+      el('rect', { x: 0, y: HZ, width: W, height: H - HZ, fill: url('sea') });
+      // moonlight on the water
+      const R = rng(55), streaks = [];
+      for (let i = 0; i < 18; i++) {
+        const y = HZ + 8 + Math.pow(i / 18, 1.3) * 260, w = (30 + R() * 90) * (1 + i / 12);
+        streaks.push({ n: el('rect', { x: 0, y: f2(y), width: f2(w), height: f2(2 + i / 6), rx: 2, fill: MOON.c[1] }), y, w, ph: R() * TAU, k: 0.6 + R() });
+      }
+      anim.push(t => { for (const s of streaks) { s.n.setAttribute('x', f2(MOON.x - s.w / 2 + 14 * Math.sin(TAU * s.k * t / 2 + s.ph))); s.n.setAttribute('opacity', f2(0.25 + 0.4 * (0.5 + 0.5 * Math.sin(TAU * s.k * t + s.ph)))); } });
+      // waves
+      const waves = [];
+      for (let i = 0; i < 7; i++) waves.push({ n: el('path', { fill: 'none', stroke: '#9EB8E0', 'stroke-width': 1.4, opacity: 0.18 + i * 0.03 }), y: HZ + 20 + i * 26 + i * i * 3, a: 3 + i * 1.6, l: 120 + i * 30, sp: 0.3 + i * 0.08 });
+      anim.push(t => {
+        for (const w of waves) {
+          let d = '';
+          for (let x = -40; x <= W + 40; x += 20) d += `${x === -40 ? 'M' : 'L'}${x},${f2(w.y + w.a * Math.sin(TAU * (x / w.l - t * w.sp)))} `;
+          w.n.setAttribute('d', d);
+        }
+      });
+      // lighthouse with a sweeping beam
+      const beam = el('path', { fill: url('beam') });
+      el('path', { d: 'M800,1010 C820,960 860,930 900,912 L960,905 C1000,915 1040,930 1080,950 L1080,1030 L800,1030Z', fill: T.sil });
+      el('path', { d: 'M906,912 L916,730 L948,730 L958,912Z', fill: T.sil });
+      el('path', { d: 'M908,730 L956,730 L952,702 L912,702Z', fill: '#FFF2C0' });
+      el('path', { d: 'M904,700 L960,700 L932,678Z M902,730 L962,730 L962,736 L902,736Z', fill: T.sil });
+      const lamp = el('circle', { cx: 932, cy: 716, r: 60, fill: url('glow') });
+      anim.push(t => {
+        const a = TAU * t / 6, c = Math.cos(a), s = Math.sin(a);
+        const L = 900 * c;
+        beam.setAttribute('d', `M932,712 L${f2(932 + L)},${f2(712 - 70 * Math.abs(c) - 20)} L${f2(932 + L)},${f2(712 + 70 * Math.abs(c) + 20)}Z`);
+        beam.setAttribute('transform', c < 0 ? 'translate(1864,0) scale(-1,1)' : '');
+        beam.setAttribute('d', `M932,712 L${f2(932 + Math.abs(L))},${f2(712 - 60 * Math.abs(c) - 18)} L${f2(932 + Math.abs(L))},${f2(712 + 60 * Math.abs(c) + 18)}Z`);
+        beam.setAttribute('opacity', f2(0.35 + 0.65 * Math.abs(c)));
+        lamp.setAttribute('r', f2(50 + 70 * Math.max(0, s)));
+        lamp.setAttribute('opacity', f2(0.6 + 0.4 * Math.max(0, s)));
+      });
+      // the ghost ship
+      const ship = el('g');
+      const sails = el('g', { fill: '#CFE8FF', stroke: '#CFE8FF', 'stroke-width': 1.4 }, ship);
+      for (const [x, top, w, h] of [[-90, -250, 110, 70], [-90, -170, 120, 70], [10, -300, 130, 80], [10, -210, 140, 80], [110, -230, 100, 60], [110, -160, 110, 60]]) {
+        el('path', { d: `M${x - w / 2},${top} Q${x},${top + 10} ${x + w / 2},${top} L${x + w / 2 - 6},${top + h - 10} L${x + w / 4},${top + h} L${x + 4},${top + h - 14} L${x - w / 6},${top + h + 4} L${x - w / 2 + 8},${top + h - 8}Z`, 'fill-opacity': 0.22, 'stroke-opacity': 0.5 }, sails);
+      }
+      const hull = el('g', { fill: T.sil, stroke: T.sil }, ship);
+      el('path', { d: 'M-200,-40 L190,-40 L230,-80 L240,-74 L200,-10 C120,10 -120,10 -180,-6 L-220,-60 L-210,-64Z', stroke: 'none' }, hull);
+      el('path', { d: 'M-210,-64 L-210,-100 L-150,-100 L-150,-40', stroke: 'none' }, hull);
+      for (const [x, h] of [[-90, 280], [10, 330], [110, 250]]) el('path', { d: `M${x},-40 L${x},${-h}`, 'stroke-width': 5, fill: 'none' }, hull);
+      el('path', { d: 'M190,-40 L300,-120 M-90,-280 L10,-330 L110,-250 M10,-330 L230,-80 M-90,-280 L-210,-100', 'stroke-width': 1.5, fill: 'none', opacity: 0.8 }, hull);
+      el('path', { d: 'M10,-330 L10,-350 L40,-344 L10,-338', 'stroke-width': 2, fill: T.sil }, hull);
+      for (const x of [-120, -60, 0, 60, 120]) el('circle', { cx: x, cy: -22, r: 4, fill: '#9BE0C8', stroke: 'none' }, hull);
+      const shipGlow = el('circle', { cx: -180, cy: -86, r: 50, fill: url('accentGlow') }, ship);
+      anim.push(t => {
+        const bob = 7 * Math.sin(TAU * t / 3.6), roll = 2.4 * Math.sin(TAU * t / 4.4);
+        ship.setAttribute('transform', `translate(330,${f2(HZ + 40 + bob)}) rotate(${f2(roll)}) scale(0.82)`);
+        sails.setAttribute('opacity', f2(0.75 + 0.25 * Math.sin(TAU * t / 2.2)));
+        shipGlow.setAttribute('opacity', f2(0.6 + 0.4 * Math.sin(TAU * t * 1.4)));
+      });
+      el('path', { d: `M0,1150 C40,1120 90,1110 140,1130 C170,1150 190,1170 200,1200 L0,1200Z M1080,1140 C1030,1110 980,1112 940,1135 C920,1150 905,1175 900,1200 L1080,1200Z`, fill: T.sil });
+      el('rect', { x: 0, y: 1080, width: W, height: H - 1080, fill: url('darken') });
+      fogBand(1020, 6, 14, 80, 18, 0.55);
+    }
+
+    function sceneCarnival() {
+      hills();
+      // ferris wheel (turning) against the moon
+      const cx = 400, cy = 760, Rw = 230;
+      el('path', { d: `M${cx},${cy} L${cx - 120},1040 M${cx},${cy} L${cx + 120},1040 M${cx - 90},980 L${cx + 90},980`, stroke: T.sil, 'stroke-width': 10, fill: 'none' });
+      const wheel = el('g', { stroke: T.sil, fill: 'none' });
+      el('circle', { cx: 0, cy: 0, r: Rw, 'stroke-width': 7 }, wheel);
+      el('circle', { cx: 0, cy: 0, r: Rw - 24, 'stroke-width': 3 }, wheel);
+      el('circle', { cx: 0, cy: 0, r: 30, 'stroke-width': 6 }, wheel);
+      for (let i = 0; i < 16; i++) { const a = i * TAU / 16; el('path', { d: `M0,0 L${f2(Rw * Math.cos(a))},${f2(Rw * Math.sin(a))}`, 'stroke-width': 2.5 }, wheel); }
+      const COLORS = ['#FFD36B', '#FF7AB8', '#7FE0FF', '#B6FF7A'];
+      const bulbs = [];
+      for (let i = 0; i < 32; i++) { const a = i * TAU / 32; bulbs.push(el('circle', { cx: f2(Rw * Math.cos(a)), cy: f2(Rw * Math.sin(a)), r: 4.5, fill: COLORS[i % 4], stroke: 'none' }, wheel)); }
+      const gond = [];
+      for (let i = 0; i < 8; i++) {
+        const g = el('g', { fill: T.sil });
+        el('path', { d: 'M0,0 L0,14 M-22,14 L22,14 L18,44 L-18,44Z', stroke: T.sil, 'stroke-width': 3 }, g);
+        el('rect', { x: -12, y: 20, width: 24, height: 10, fill: '#FFC97A', opacity: 0.8 }, g);
+        gond.push(g);
+      }
+      el('circle', { cx, cy, r: 12, fill: T.sil });
+      anim.push(t => {
+        const rot = t * 9;
+        wheel.setAttribute('transform', `translate(${cx},${cy}) rotate(${f2(rot)})`);
+        gond.forEach((g, i) => {
+          const a = (i * 45 + rot) * Math.PI / 180;
+          g.setAttribute('transform', `translate(${f2(cx + Rw * Math.cos(a))},${f2(cy + Rw * Math.sin(a))}) rotate(${f2(4 * Math.sin(TAU * t / 2 + i))})`);
+        });
+        bulbs.forEach((b, i) => b.setAttribute('opacity', f2(0.35 + 0.65 * (0.5 + 0.5 * Math.sin(TAU * (t * 1.5 - i / 8))))));
+      });
+      backHill();
+      // striped circus tent
+      const tent = el('g');
+      el('path', { d: 'M620,1060 L644,920 C700,880 770,820 820,750 C870,820 940,880 996,920 L1020,1060Z', fill: T.sil }, tent);
+      for (let i = 0; i < 6; i++) {
+        const x0 = 644 + i * 70, x1 = x0 + 35;
+        el('path', { d: `M820,752 L${x0},${i === 0 ? 920 : 1060} L${x1},1060Z`, fill: T.back, opacity: 0.85 }, tent);
+      }
+      el('path', { d: 'M640,924 C680,946 720,946 740,926 C760,946 800,946 820,926 C840,946 880,946 900,926 C920,946 960,946 1000,924', fill: 'none', stroke: T.sil, 'stroke-width': 10 }, tent);
+      const door = el('path', { d: 'M780,1060 L780,1000 A40,40 0 0 1 860,1000 L860,1060Z', fill: '#FFB86B' }, tent);
+      const doorGlow = el('circle', { cx: 820, cy: 1030, r: 120, fill: url('glow') }, tent);
+      el('path', { d: 'M820,752 L820,700', stroke: T.sil, 'stroke-width': 4 }, tent);
+      const flag = el('path', { fill: T.sil }, tent);
+      anim.push(t => {
+        const w = Math.sin(TAU * t * 1.2);
+        flag.setAttribute('d', `M820,700 C${f2(834 + 3 * w)},${f2(696 - 4 * w)} ${f2(846 - 3 * w)},${f2(706 + 4 * w)} ${f2(862)},${f2(702 + 3 * w)} L${f2(860)},${f2(716 + 3 * w)} C${f2(846 - 3 * w)},${f2(720 + 4 * w)} ${f2(834 + 3 * w)},${f2(710 - 4 * w)} 820,716Z`);
+        const v = 0.8 + 0.12 * Math.sin(TAU * 3 * t) + 0.08 * Math.sin(TAU * 7.3 * t);
+        door.setAttribute('opacity', f2(v)); doorGlow.setAttribute('opacity', f2(v));
+      });
+      // string lights
+      const lights = [];
+      const garland = (x0, y0, x1, y1, sag, n) => {
+        el('path', { d: `M${x0},${y0} Q${(x0 + x1) / 2},${(y0 + y1) / 2 + sag * 2} ${x1},${y1}`, fill: 'none', stroke: T.sil, 'stroke-width': 2 });
+        for (let i = 1; i < n; i++) {
+          const u = i / n, x = (1 - u) * (1 - u) * x0 + 2 * u * (1 - u) * (x0 + x1) / 2 + u * u * x1;
+          const y = (1 - u) * (1 - u) * y0 + 2 * u * (1 - u) * ((y0 + y1) / 2 + sag * 2) + u * u * y1;
+          lights.push({ g: el('circle', { cx: f2(x), cy: f2(y + 5), r: 12, fill: url('accentGlow') }), b: el('circle', { cx: f2(x), cy: f2(y + 5), r: 4, fill: COLORS[i % 4] }), i: lights.length });
+        }
+      };
+      el('path', { d: 'M1040,1080 L1040,840 M600,1080 L600,900', stroke: T.sil, 'stroke-width': 6 });
+      garland(820, 754, 1040, 840, 40, 9);
+      garland(600, 900, 820, 754, 50, 9);
+      anim.push(t => { for (const l of lights) { const v = (Math.floor(t * 3 + l.i) % 3 === 0) ? 0.35 : 1; l.b.setAttribute('opacity', v); l.g.setAttribute('opacity', f2(v * 0.8)); } });
+      midHill();
+      fogBand(1050, 7, 3, 70, 14, 0.8);
+      tree(1000, 1210, 88, -1, 0.7);
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.4);
+      // a lone red balloon drifting up
+      const bal = el('g');
+      const str = el('path', { fill: 'none', stroke: '#E9DCC4', 'stroke-width': 1.4, opacity: 0.7 }, bal);
+      el('ellipse', { cx: 0, cy: 0, rx: 26, ry: 32, fill: '#C8243A' }, bal);
+      el('ellipse', { cx: -8, cy: -10, rx: 7, ry: 10, fill: '#FF8A9A', opacity: 0.5 }, bal);
+      el('path', { d: 'M-4,31 L4,31 L0,37Z', fill: '#C8243A' }, bal);
+      anim.push(t => {
+        const u = (t / 14 + 0.62) % 1;
+        const x = 170 + 60 * Math.sin(u * TAU * 1.5), y = 1220 - u * 1300;
+        bal.setAttribute('transform', `translate(${f2(x)},${f2(y)}) rotate(${f2(6 * Math.sin(TAU * t / 3))})`);
+        bal.setAttribute('opacity', f2(Math.min(1, u * 10, (1 - u) * 10)));
+        const s = Math.sin(TAU * t);
+        str.setAttribute('d', `M0,37 C${f2(10 * s)},70 ${f2(-10 * s)},100 ${f2(6 * s)},140`);
+      });
+    }
+
+    ({ manor: sceneManor, witch: sceneWitch, patch: scenePatch, grave: sceneGrave, vamp: sceneVamp, forest: sceneForest, ship: sceneShip, carnival: sceneCarnival })[theme]();
 
     /* ---------- cobwebs + spider ---------- */
     function cobweb(sx) {

@@ -112,10 +112,14 @@
   @keyframes glowp { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
   main { position: relative; z-index: 1; padding-bottom: calc(clamp(80px, 15vh, 150px) + 20px + env(safe-area-inset-bottom)); }
   .toast { z-index: 2; }
+  /* opening splash: hide the page until the moon-and-bats intro finishes */
+  main { transition: opacity .9s ease, transform .9s ease; }
+  body.splash main { opacity: 0; transform: translateY(16px); pointer-events: none; }
+  body.splash { overflow: hidden; }
   @media (prefers-reduced-motion: reduce) { .spider, .pk-face, .pk-glow { animation: none; } }
 </style>
 </head>
-<body>
+<body class="splash">
 <canvas id="bg" aria-hidden="true"></canvas>
 <svg class="web l" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
 <svg class="web r" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
@@ -143,16 +147,7 @@
 <main>
   <div class="hero">
     <div class="deck" id="deck" aria-roledescription="carousel" aria-label="Invitation cards">
-      <div class="slide"><div class="card">
-        <noscript><img src="invitation.jpg" alt="Invitation"></noscript>
-        <svg class="art" data-theme="manor" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Card 1: bats burst from a full moon over a haunted manor"></svg>
-      </div></div>
-      <div class="slide"><div class="card">
-        <svg class="art" data-theme="witch" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Card 2: a witch flies across a green moon above a bubbling cauldron"></svg>
-      </div></div>
-      <div class="slide"><div class="card">
-        <svg class="art" data-theme="patch" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Card 3: a pumpkin-headed scarecrow in a glowing pumpkin patch under a harvest moon"></svg>
-      </div></div>
+      <noscript><img src="invitation.jpg" alt="Invitation" style="width:100%;display:block"></noscript>
     </div>
     <div class="deck-nav">
       <button class="nav-btn" id="prev" type="button" aria-label="Previous card">‹</button>
@@ -245,7 +240,7 @@ const PARTY = {
 
 const $ = id => document.getElementById(id);
 
-/* ---------- the three animated cards ---------- */
+/* ---------- the animated cards ---------- */
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const titleLines = PARTY.title.match(/^(.*\S)\s+(\S+)$/) || [null, PARTY.title, ''];
 const party = {
@@ -254,28 +249,55 @@ const party = {
   time: PARTY.timeText, venue: PARTY.venue.toUpperCase(), address: PARTY.address, note: PARTY.note,
   rsvpNumber: PARTY.phoneShown,
 };
+const DESCRIBE = {
+  manor: 'bats burst from a full moon over a haunted manor',
+  witch: 'a witch flies across a green moon above a bubbling cauldron',
+  patch: 'a pumpkin-headed scarecrow in a glowing pumpkin patch',
+  grave: 'ghosts rise behind an iron cemetery gate under a blue moon',
+  vamp: 'a vampire castle on a cliff beneath a blood moon',
+  forest: 'glowing eyes and an owl in a moonlit forest',
+  ship: 'a ghost ship and a lighthouse on a moonlit sea',
+  carnival: 'a turning Ferris wheel and circus tent at a haunted carnival',
+};
 const deck = $('deck');
+// each slide builds its card the first time it is needed.
 // clock: performance.now() at the card's t = 0 while it plays; at: its time while paused
-const cards = [...document.querySelectorAll('.art')].map(svg => ({
-  svg, card: HauntCard.create(svg, { theme: svg.dataset.theme, lite: true, party }), clock: null, at: 6,
-}));
-let active = 0, visible = true, raf = 0;
+const cards = HauntCard.THEMES.map((theme, i) => {
+  const slide = document.createElement('div'); slide.className = 'slide';
+  const box = document.createElement('div'); box.className = 'card';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'art'); svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `Card ${i + 1}: ${DESCRIBE[theme] || HauntCard.themeNames[theme]}`);
+  box.appendChild(svg); slide.appendChild(box); deck.appendChild(slide);
+  return { theme, svg, card: null, clock: null, at: 6 };
+});
+function build(i) {
+  const c = cards[i];
+  if (c && !c.card) {
+    c.card = HauntCard.create(c.svg, { theme: c.theme, lite: true, party });
+    c.card.ready.then(() => { if (c.clock === null) c.card.setTime(c.at); });
+  }
+  return c;
+}
+let active = 0, visible = true, raf = 0, entered = false;
 
 function frame(now) {
   const c = cards[active];
-  if (c.clock === null) c.clock = now - c.at * 1000;
-  c.card.setTime((now - c.clock) / 1000);
+  if (c.card) {
+    if (c.clock === null) c.clock = now - c.at * 1000;
+    c.card.setTime((now - c.clock) / 1000);
+  }
   raf = visible ? requestAnimationFrame(frame) : 0;
 }
 function pause(c) { if (c.clock !== null) { c.at = (performance.now() - c.clock) / 1000; c.clock = null; } }
-function run() { if (!reduceMotion && visible && !raf) raf = requestAnimationFrame(frame); }
+function run() { if (!reduceMotion && visible && entered && !raf) raf = requestAnimationFrame(frame); }
 
 function moonOnScreen(c) {
   const r = c.svg.getBoundingClientRect(), m = c.card.moon;
   return [r.left + m.x * r.width, r.top + m.y * r.height];
 }
 function replay() {
-  const c = cards[active];
+  const c = build(active);
   c.clock = null; c.at = 0;
   run();
   PageIntro.play(...moonOnScreen(c));
@@ -284,36 +306,39 @@ function replay() {
 /* carousel */
 cards.forEach((c, i) => {
   const b = document.createElement('button');
-  b.className = 'dot'; b.type = 'button'; b.setAttribute('aria-label', HauntCard.themeNames[c.card.theme]);
+  b.className = 'dot'; b.type = 'button'; b.setAttribute('aria-label', HauntCard.themeNames[c.theme]);
   b.addEventListener('click', () => go(i));
   $('dots').appendChild(b);
 });
 function go(i) { deck.scrollTo({ left: i * deck.clientWidth, behavior: reduceMotion ? 'auto' : 'smooth' }); }
 function setActive(i) {
   i = Math.max(0, Math.min(cards.length - 1, i));
+  for (const k of [i - 1, i, i + 1]) build(k);
   if (i !== active) { pause(cards[active]); active = i; }
   document.querySelectorAll('.dot').forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
-  $('deck-name').textContent = `${HauntCard.themeNames[cards[i].card.theme]} · ${i + 1} of ${cards.length}`;
+  $('deck-name').textContent = `${HauntCard.themeNames[cards[i].theme]} · ${i + 1} of ${cards.length}`;
   $('prev').disabled = i === 0; $('next').disabled = i === cards.length - 1;
 }
 deck.addEventListener('scroll', () => setActive(Math.round(deck.scrollLeft / deck.clientWidth)), { passive: true });
 $('prev').addEventListener('click', () => go(active - 1));
 $('next').addEventListener('click', () => go(active + 1));
 
-// ?card=witch (or 2) opens a particular card first
+// ?card=witch (or a number) opens a particular card first
 const want = new URLSearchParams(location.search).get('card');
-const startIdx = Math.max(0, cards.findIndex((c, i) => c.card.theme === want || String(i + 1) === want));
+const startIdx = Math.max(0, cards.findIndex((c, i) => c.theme === want || String(i + 1) === want));
 active = startIdx;
 setActive(startIdx);
 if (startIdx) requestAnimationFrame(() => { deck.scrollLeft = startIdx * deck.clientWidth; });
 
-Promise.all(cards.map(c => c.card.ready)).then(() => {
-  cards.forEach(c => c.card.setTime(6));
-  if (reduceMotion) return;
-  cards[active].clock = null; cards[active].at = 0; // play the intro once fonts are ready
-  run();
-});
-if (!reduceMotion) requestAnimationFrame(() => PageIntro.play(...moonOnScreen(cards[active])));
+/* opening: 5 seconds of moon, background and bats, then the page */
+function enter() {
+  document.body.classList.remove('splash');
+  entered = true;
+  const c = cards[active];
+  if (!reduceMotion) { c.clock = null; c.at = 1.0; } // the card lights up and its text appears
+  c.card.ready.then(run);
+}
+PageIntro.splash(5, enter);
 
 $('replay').addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });

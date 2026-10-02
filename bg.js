@@ -93,7 +93,8 @@
   function draw(t, dt) {
     ctx.clearRect(0, 0, w, h);
 
-    // moon
+    // moon (the splash screen draws its own big one)
+    if (!document.body.classList.contains('splash')) {
     const mr = Math.max(60, Math.min(w, h) * 0.11), mx = w * 0.84, my = h * 0.13;
     const glow = ctx.createRadialGradient(mx, my, mr * 0.6, mx, my, mr * 3.2);
     glow.addColorStop(0, `rgba(246,196,126,${0.22 + 0.04 * Math.sin(t / 2)})`); glow.addColorStop(1, 'rgba(232,131,74,0)');
@@ -103,6 +104,7 @@
     ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(mx, my, mr, 0, TAU); ctx.fill();
     ctx.fillStyle = 'rgba(201,130,74,0.16)';
     for (const [dx, dy, cr] of [[-0.35, -0.25, 0.2], [0.25, 0.18, 0.26], [-0.1, 0.45, 0.12], [0.45, -0.38, 0.1]]) { ctx.beginPath(); ctx.arc(mx + dx * mr, my + dy * mr, cr * mr, 0, TAU); ctx.fill(); }
+    }
 
     // stars
     ctx.fillStyle = '#F1E6D0';

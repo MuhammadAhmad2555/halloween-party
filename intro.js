@@ -92,10 +92,72 @@
     setup(); size();
     origin = [ox ?? w / 2, oy ?? h * 0.3];
     makeSwarm();
-    cv.style.display = 'block';
+    cv.style.transition = 'none'; cv.style.opacity = '1'; cv.style.display = 'block';
     cancelAnimationFrame(raf);
     t0 = performance.now();
     raf = requestAnimationFrame(frame);
   }
-  global.PageIntro = { play, DURATION };
+  /* Opening splash: only the big moon, the background and bats flying toward you. */
+  function splash(seconds, onDone) {
+    setup(); size();
+    let done = false;
+    const finish = () => { if (done) return; done = true; onDone && onDone(); };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+    const rnd2 = (a, b) => a + Math.random() * (b - a);
+    const unitOf = () => Math.min(w, h) / 390;
+    const moonAt = () => [w / 2, h * 0.42, Math.min(w, h) * 0.27];
+    const swarm = [];
+    const n = Math.round(Math.min(90, Math.max(45, (w * h) / 8000)));
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * TAU, spread = Math.pow(Math.random(), 0.7);
+      swarm.push({ ts: 0.5 + (i / n) * (seconds - 1.6) + rnd2(-0.15, 0.15), X: Math.cos(a) * spread, Y: Math.sin(a) * spread,
+        v: rnd2(3, 5), hz: rnd2(7, 11), ph: Math.random(), wob: rnd2(-1, 1), alive: true, big: i % 9 === 0 });
+    }
+    const start = performance.now();
+    cv.style.display = 'block'; cv.style.opacity = '1';
+    cv.style.transition = 'opacity .9s ease';
+    const skip = () => { if (!done) { finish(); cv.style.opacity = '0'; setTimeout(() => { cv.style.display = 'none'; cancelAnimationFrame(raf); }, 900); } };
+    window.addEventListener('pointerdown', skip, { once: true });
+    cancelAnimationFrame(raf);
+    (function loop(now) {
+      const t = (now - start) / 1000;
+      if (t > seconds + 1) { cv.style.display = 'none'; return; }
+      if (t > seconds - 0.4 && !done) { finish(); cv.style.opacity = '0'; }
+      ctx.clearRect(0, 0, w, h);
+      const [mx, my, mr] = moonAt(), unit = unitOf();
+      // dim light: a dark veil that lifts a little as the moon brightens
+      const lift = ease(t / 2.2), flick = 1 + 0.03 * Math.sin(t * 19) + 0.02 * Math.sin(t * 31);
+      ctx.fillStyle = `rgba(4,2,7,${0.82 - 0.42 * lift})`; ctx.fillRect(0, 0, w, h);
+      // the moon rising a little and glowing up
+      const rise = (1 - ease(t / 3)) * h * 0.05, gy = my + rise;
+      const glow = ctx.createRadialGradient(mx, gy, mr * 0.7, mx, gy, mr * 3.2);
+      glow.addColorStop(0, `rgba(246,196,126,${(0.22 + 0.33 * lift) * flick})`); glow.addColorStop(0.45, `rgba(232,131,74,${0.1 * lift})`); glow.addColorStop(1, 'rgba(232,131,74,0)');
+      ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+      const mg = ctx.createRadialGradient(mx - mr * 0.25, gy - mr * 0.28, mr * 0.1, mx, gy, mr);
+      mg.addColorStop(0, '#FFF4D6'); mg.addColorStop(0.45, '#F8DC9C'); mg.addColorStop(0.8, '#EDB06A'); mg.addColorStop(1, '#D98A4C');
+      ctx.globalAlpha = 0.35 + 0.65 * lift;
+      ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(mx, gy, mr, 0, TAU); ctx.fill();
+      ctx.fillStyle = 'rgba(201,130,74,0.22)';
+      for (const [dx, dy, cr] of [[-0.34, -0.26, 0.2], [0.26, 0.17, 0.26], [-0.13, 0.47, 0.13], [0.47, -0.38, 0.1], [-0.55, 0.2, 0.08]]) { ctx.beginPath(); ctx.arc(mx + dx * mr, gy + dy * mr, cr * mr, 0, TAU); ctx.fill(); }
+      ctx.globalAlpha = 1;
+      // bats streaming out of the moon toward the viewer
+      ctx.fillStyle = '#030104';
+      for (const b of swarm) {
+        if (!b.alive || t < b.ts) continue;
+        const age = t - b.ts, z = 6 - b.v * age * (1 + age * 0.35);
+        if (z < 0.13) { b.alive = false; continue; }
+        const k = 0.6 / z, wob = Math.sin(age * 5 + b.ph * TAU) * 14 * b.wob;
+        const x = mx + b.X * w * 0.42 * k + wob, y = gy + b.Y * h * 0.32 * k + Math.sin(age * 3 + b.ph) * 10;
+        const s = unit * (b.big ? 0.65 : 0.5) / z;
+        if (x < -s * 60 || x > w + s * 60 || y < -s * 40 || y > h + s * 40) { if (z < 1) b.alive = false; continue; }
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(b.Y, b.X || 1) * 0.12); ctx.scale(s, s);
+        ctx.globalAlpha = Math.min(1, (6 - z) * 0.8);
+        ctx.fill(frames[Math.floor(((t * b.hz + b.ph) % 1) * 20) % 20]);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(loop);
+    })(start);
+  }
+  global.PageIntro = { play, splash, DURATION };
 })(window);
