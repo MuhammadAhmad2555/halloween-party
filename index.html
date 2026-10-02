@@ -83,9 +83,52 @@
     background: #F1E6D0; color: #1A0B06; padding: 10px 18px; border-radius: 999px; font: 600 13px 'Cinzel', serif; letter-spacing: 1px; pointer-events: none; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   @media (min-width: 700px) { main { padding-top: 32px; } }
+
+  /* ---------- animated Halloween backdrop ---------- */
+  #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .webs, .graveyard { position: fixed; z-index: 0; pointer-events: none; }
+  .web { position: fixed; top: 0; width: clamp(120px, 28vw, 240px); height: auto; opacity: .3; z-index: 0; pointer-events: none; }
+  .web.l { left: 0; } .web.r { right: 0; transform: scaleX(-1); }
+  .spider { position: fixed; top: 0; right: clamp(40px, 9vw, 80px); z-index: 0; pointer-events: none; animation: dangle 7s ease-in-out infinite; transform-origin: top center; }
+  .spider svg { display: block; width: 34px; height: auto; }
+  @keyframes dangle { 0%, 100% { transform: translateY(0) rotate(0); } 40% { transform: translateY(70px) rotate(3deg); } 60% { transform: translateY(58px) rotate(-3deg); } }
+  .graveyard { left: 0; right: 0; bottom: 0; height: clamp(80px, 15vh, 150px); }
+  .graveyard svg { width: 100%; height: 100%; display: block; }
+  .pk-face { animation: flicker 2.6s infinite; }
+  .pk-face.b { animation-duration: 3.3s; animation-delay: -1s; }
+  .pk-glow { animation: glowp 2.6s infinite; }
+  @keyframes flicker { 0%, 100% { opacity: .95; } 20% { opacity: .7; } 22% { opacity: .9; } 50% { opacity: .78; } 70% { opacity: 1; } 72% { opacity: .65; } }
+  @keyframes glowp { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
+  main { position: relative; z-index: 1; padding-bottom: calc(clamp(80px, 15vh, 150px) + 20px + env(safe-area-inset-bottom)); }
+  .toast { z-index: 2; }
+  @media (prefers-reduced-motion: reduce) { .spider, .pk-face, .pk-glow { animation: none; } }
 </style>
 </head>
 <body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<svg class="web l" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
+<svg class="web r" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
+<div class="spider" aria-hidden="true"><svg viewBox="0 0 40 120"><line x1="20" y1="0" x2="20" y2="82" stroke="#F1E6D0" stroke-opacity=".45" stroke-width="1"/><g transform="translate(20,96)" stroke="#2A1D3D" stroke-width="2.4" fill="none" stroke-linecap="round"><path d="M-5,-2 Q-14,-12 -19,-5 M-5,2 Q-15,-1 -20,7 M-5,5 Q-13,9 -17,17 M-4,8 Q-9,15 -10,22 M5,-2 Q14,-12 19,-5 M5,2 Q15,-1 20,7 M5,5 Q13,9 17,17 M4,8 Q9,15 10,22"/></g><ellipse cx="20" cy="101" rx="8.5" ry="10.5" fill="#2A1D3D"/><circle cx="20" cy="89" r="5.5" fill="#2A1D3D"/><circle cx="18" cy="88" r="1.3" fill="#E8834A"/><circle cx="22" cy="88" r="1.3" fill="#E8834A"/></svg></div>
+<div class="graveyard" aria-hidden="true">
+  <svg viewBox="0 0 1200 150" preserveAspectRatio="xMidYMax slice">
+    <defs><radialGradient id="pkg"><stop offset="0" stop-color="#FFB25A" stop-opacity=".7"/><stop offset="1" stop-color="#E8834A" stop-opacity="0"/></radialGradient>
+      <radialGradient id="pkb" cx=".45" cy=".4" r=".65"><stop offset="0" stop-color="#E3803F"/><stop offset=".7" stop-color="#B9562A"/><stop offset="1" stop-color="#7E3519"/></radialGradient></defs>
+    <path d="M0,92 C150,70 300,88 450,80 C600,72 750,92 900,82 C1020,74 1120,86 1200,78 L1200,150 L0,150Z" fill="#120A1F"/>
+    <g fill="#120A1F">
+      <path d="M90,90 L90,58 A16,16 0 0 1 122,58 L122,90Z"/><path d="M140,88 L140,66 A11,11 0 0 1 162,66 L162,88Z" transform="rotate(6 151 88)"/>
+      <path d="M205,86 L205,64 L195,64 L195,57 L205,57 L205,46 L212,46 L212,57 L222,57 L222,64 L212,64 L212,86Z"/>
+      <path d="M1000,84 L1000,52 A16,16 0 0 1 1032,52 L1032,84Z" transform="rotate(-5 1016 84)"/><path d="M1060,82 L1060,62 A10,10 0 0 1 1080,62 L1080,82Z"/>
+      <path d="M940,86 L940,64 L930,64 L930,57 L940,57 L940,46 L947,46 L947,57 L957,57 L957,64 L947,64 L947,86Z" transform="rotate(4 943 86)"/>
+      <path d="M300,84 L300,40 M330,84 L330,40 M360,84 L360,40 M840,84 L840,40 M870,84 L870,40 M810,84 L810,40" stroke="#120A1F" stroke-width="4"/>
+      <path d="M296,50 L364,50 M806,50 L874,50" stroke="#120A1F" stroke-width="3"/>
+      <path d="M296,40 L300,30 L304,40Z M326,40 L330,30 L334,40Z M356,40 L360,30 L364,40Z M806,40 L810,30 L814,40Z M836,40 L840,30 L844,40Z M866,40 L870,30 L874,40Z"/>
+    </g>
+    <g transform="translate(470,96)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
+    <g transform="translate(735,100) scale(.75)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face b" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
+    <g transform="translate(140,100) scale(.9)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
+    <g transform="translate(1070,98) scale(1)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face b" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
+  </svg>
+</div>
 <main>
   <div class="hero">
     <div class="card" id="card">
@@ -139,6 +182,7 @@
 <div class="toast" id="toast">Link copied</div>
 
 <script src="art.js"></script>
+<script src="bg.js"></script>
 <script>
 /* =====================================================================
    PARTY DETAILS: EDIT EVERYTHING HERE
