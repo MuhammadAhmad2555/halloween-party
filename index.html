@@ -38,13 +38,18 @@
   main { max-width: 520px; margin: 0 auto; padding: max(12px, env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom)); text-align: center; }
 
   /* the card always fits the first screen on a phone */
-  .hero { position: relative; margin: 0 auto; width: min(100%, calc((100vh - 128px) * 9 / 16)); }
-  @supports (height: 100svh) { .hero { width: min(100%, calc((100svh - 128px) * 9 / 16)); } }
+  /* phones: the card fits the first screen; landscape phones never shrink below 280px */
+  .hero { position: relative; margin: 0 auto; width: min(100%, max(280px, calc((100vh - 128px) * 9 / 16))); }
+  @supports (height: 100svh) { .hero { width: min(100%, max(280px, calc((100svh - 128px) * 9 / 16))); } }
   .deck { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 18px; overscroll-behavior-x: contain;
     box-shadow: 0 0 60px rgba(232, 131, 74, .22), 0 20px 50px rgba(0, 0, 0, .6); }
   .deck::-webkit-scrollbar { display: none; }
   .slide { flex: 0 0 100%; scroll-snap-align: center; scroll-snap-stop: always; }
-  .card { position: relative; aspect-ratio: 9 / 16; overflow: hidden; background: #05030A; }
+  .card { position: relative; aspect-ratio: 9 / 16; overflow: hidden; background: #05030A; cursor: zoom-in; -webkit-tap-highlight-color: transparent; }
+  .expand { position: absolute; top: 12px; left: 12px; z-index: 2; width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(241, 230, 208, .35);
+    background: rgba(5, 3, 10, .45); color: var(--cream); display: grid; place-items: center; pointer-events: none; opacity: .8;
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+  .expand svg { width: 16px; height: 16px; }
   .deck-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; }
   .nav-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(241, 230, 208, .35); background: rgba(10, 7, 23, .5); color: var(--cream);
     font: 22px/1 Georgia, serif; cursor: pointer; display: grid; place-items: center; padding: 0 0 3px; -webkit-tap-highlight-color: transparent; }
@@ -53,7 +58,7 @@
   .dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(241, 230, 208, .3); cursor: pointer; transition: .25s; }
   .dot[aria-current="true"] { background: var(--cream); transform: scale(1.25); box-shadow: 0 0 10px rgba(241, 230, 208, .6); }
   .deck-name { margin: 6px 0 0; font-size: 18px; color: var(--soft); min-height: 1.45em; }
-  .card svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .card svg.art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .hero-bar { display: flex; justify-content: space-between; align-items: center; height: 44px; padding: 0 4px; }
   .link-btn { background: none; border: 0; color: var(--soft); font: italic 500 18px 'Cormorant Garamond', serif; padding: 8px 4px; cursor: pointer; opacity: .85; text-decoration: none; }
@@ -94,6 +99,44 @@
     background: #F1E6D0; color: #1A0B06; padding: 10px 18px; border-radius: 999px; font: 600 13px 'Cinzel', serif; letter-spacing: 1px; pointer-events: none; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
   @media (min-width: 700px) { main { padding-top: 32px; } }
+
+  /* very small phones: stack the two half-width buttons */
+  @media (max-width: 340px) { .two { grid-template-columns: 1fr; } .countdown strong { font-size: 30px; } }
+  /* tablets in portrait: a bigger card and a wider column */
+  @media (min-width: 600px) { main { max-width: 600px; } .hero { width: min(100%, max(320px, calc((100svh - 140px) * 9 / 16))); } }
+  /* tablets in landscape, laptops, desktops: card on the left, details on the right */
+  @media (min-width: 900px) and (orientation: landscape), (min-width: 1100px) {
+    main { max-width: 1120px; display: grid; grid-template-columns: auto minmax(340px, 460px); column-gap: clamp(32px, 5vw, 80px);
+      justify-content: center; align-items: start; }
+    main > * { grid-column: 2; }
+    main > .hero { grid-column: 1; grid-row: 1 / span 12; position: sticky; top: 20px; width: min(520px, calc((100vh - 150px) * 9 / 16)); }
+    @supports (height: 100svh) { main > .hero { width: min(520px, calc((100svh - 150px) * 9 / 16)); } }
+    main > h1 { margin-top: 40px; }
+  }
+
+  /* ---------- full-screen card ---------- */
+  .viewer { position: fixed; inset: 0; z-index: 45; display: none; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 50% 35%, rgba(46, 24, 70, .92), rgba(3, 2, 7, .98) 70%); touch-action: pan-y; }
+  .viewer.open { display: flex; animation: vin .35s ease; }
+  @keyframes vin { from { opacity: 0; } to { opacity: 1; } }
+  .viewer-card { position: relative; aspect-ratio: 9 / 16; width: min(100vw, calc(100vh * 9 / 16)); overflow: hidden; background: #05030A;
+    box-shadow: 0 0 80px rgba(0, 0, 0, .8); }
+  @supports (height: 100dvh) { .viewer-card { width: min(100vw, calc(100dvh * 9 / 16)); } }
+  @media (min-aspect-ratio: 9/16) { .viewer-card { border-radius: 14px; } }
+  .viewer-card svg.art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .vbtn { position: absolute; z-index: 3; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(241, 230, 208, .35);
+    background: rgba(5, 3, 10, .55); color: var(--cream); display: grid; place-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); font: 26px/1 Georgia, serif; padding: 0; }
+  .vbtn svg { width: 20px; height: 20px; }
+  .vbtn:disabled { opacity: .25; cursor: default; }
+  .v-close { top: max(14px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); }
+  .v-replay { top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); }
+  .v-prev, .v-next { top: 50%; transform: translateY(-50%); }
+  .v-prev { left: max(10px, env(safe-area-inset-left)); } .v-next { right: max(10px, env(safe-area-inset-right)); }
+  .v-label { position: absolute; z-index: 3; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); white-space: nowrap;
+    padding: 6px 14px; border-radius: 999px; background: rgba(5, 3, 10, .55); color: var(--soft); font: italic 500 16px 'Cormorant Garamond', serif;
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  body.viewing { overflow: hidden; }
 
   /* ---------- animated Halloween backdrop ---------- */
   #bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
@@ -143,6 +186,14 @@
     <g transform="translate(140,100) scale(.9)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
     <g transform="translate(1070,98) scale(1)"><circle class="pk-glow" r="70" fill="url(#pkg)"/><ellipse cx="-14" rx="17" ry="18" fill="url(#pkb)"/><ellipse cx="14" rx="17" ry="18" fill="url(#pkb)"/><ellipse rx="13" ry="19" fill="url(#pkb)"/><path d="M-2,-18 L-2,-25 L3,-28 L3,-18Z" fill="#3A2A18"/><path class="pk-face b" fill="#FFC35A" d="M-15,-7 L-7,-7 L-11,-15Z M7,-7 L15,-7 L11,-15Z M-17,2 Q0,13 17,2 L14,8 L8,6 L4,11 L0,7 L-4,11 L-8,6 L-14,8Z"/></g>
   </svg>
+</div>
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Invitation card, full screen">
+  <div class="viewer-card" id="viewer-card"></div>
+  <button class="vbtn v-close" id="v-close" type="button" aria-label="Close full screen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <button class="vbtn v-replay" id="v-replay" type="button" aria-label="Replay the bats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg></button>
+  <button class="vbtn v-prev" id="v-prev" type="button" aria-label="Previous card">‹</button>
+  <button class="vbtn v-next" id="v-next" type="button" aria-label="Next card">›</button>
+  <p class="v-label" id="v-label"></p>
 </div>
 <main>
   <div class="hero">
@@ -269,6 +320,10 @@ const cards = HauntCard.THEMES.map((theme, i) => {
   svg.setAttribute('class', 'art'); svg.setAttribute('role', 'img');
   svg.setAttribute('aria-label', `Card ${i + 1}: ${DESCRIBE[theme] || HauntCard.themeNames[theme]}`);
   box.appendChild(svg); slide.appendChild(box); deck.appendChild(slide);
+  box.insertAdjacentHTML('beforeend', '<span class="expand" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></span>');
+  box.addEventListener('click', () => openViewer());
+  box.setAttribute('tabindex', '0'); box.setAttribute('role', 'button'); box.setAttribute('aria-label', `Open card ${i + 1} full screen`);
+  box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openViewer(); } });
   return { theme, svg, card: null, clock: null, at: 6 };
 });
 function build(i) {
@@ -279,7 +334,7 @@ function build(i) {
   }
   return c;
 }
-let active = 0, visible = true, raf = 0, entered = false;
+let active = 0, visible = true, raf = 0, entered = false, viewing = false, shownIdx = -1;
 
 function frame(now) {
   const c = cards[active];
@@ -318,6 +373,7 @@ function setActive(i) {
   document.querySelectorAll('.dot').forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
   $('deck-name').textContent = `${HauntCard.themeNames[cards[i].theme]} · ${i + 1} of ${cards.length}`;
   $('prev').disabled = i === 0; $('next').disabled = i === cards.length - 1;
+  if (viewing) showInViewer();
 }
 deck.addEventListener('scroll', () => setActive(Math.round(deck.scrollLeft / deck.clientWidth)), { passive: true });
 $('prev').addEventListener('click', () => go(active - 1));
@@ -329,6 +385,72 @@ const startIdx = Math.max(0, cards.findIndex((c, i) => c.theme === want || Strin
 active = startIdx;
 setActive(startIdx);
 if (startIdx) requestAnimationFrame(() => { deck.scrollLeft = startIdx * deck.clientWidth; });
+
+
+/* ---------- full-screen viewer ---------- */
+// The card's own <svg> moves into the viewer and back, so its animation keeps running.
+const viewer = $('viewer'), vcard = $('viewer-card');
+function homeOf(c) { return cards.indexOf(c) >= 0 ? deck.children[cards.indexOf(c) + (deck.children.length - cards.length)].firstChild : null; }
+function showInViewer() {
+  if (shownIdx >= 0 && shownIdx !== active) homeOf(cards[shownIdx]).prepend(cards[shownIdx].svg);
+  const c = build(active);
+  vcard.appendChild(c.svg);
+  shownIdx = active;
+  $('v-label').textContent = `${HauntCard.themeNames[c.theme]} · ${active + 1} of ${cards.length}`;
+  $('v-prev').disabled = active === 0; $('v-next').disabled = active === cards.length - 1;
+}
+function openViewer() {
+  if (viewing) return;
+  viewing = true;
+  document.body.classList.add('viewing');
+  viewer.classList.add('open');
+  showInViewer();
+  visible = true; run();
+  history.pushState({ viewer: 1 }, '');
+  const fs = viewer.requestFullscreen || viewer.webkitRequestFullscreen;
+  if (fs && !/iPhone|iPod/.test(navigator.userAgent)) { try { const p = fs.call(viewer); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+}
+function closeViewer(fromHistory) {
+  if (!viewing) return;
+  viewing = false;
+  if (shownIdx >= 0) homeOf(cards[shownIdx]).prepend(cards[shownIdx].svg);
+  shownIdx = -1;
+  viewer.classList.remove('open');
+  document.body.classList.remove('viewing');
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+  if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  if (!fromHistory && history.state && history.state.viewer) history.back();
+  deck.scrollLeft = active * deck.clientWidth;
+}
+function step(d) {
+  const i = Math.max(0, Math.min(cards.length - 1, active + d));
+  if (i === active) return;
+  deck.scrollLeft = i * deck.clientWidth; // keeps the carousel in sync
+  setActive(i);
+}
+$('v-close').addEventListener('click', () => closeViewer());
+$('v-prev').addEventListener('click', () => step(-1));
+$('v-next').addEventListener('click', () => step(1));
+$('v-replay').addEventListener('click', replay);
+window.addEventListener('popstate', () => closeViewer(true));
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && viewing && !document.webkitFullscreenElement) { /* user left fullscreen with a system gesture; keep the overlay open */ } });
+document.addEventListener('keydown', e => {
+  if (!viewing) return;
+  if (e.key === 'Escape') closeViewer();
+  if (e.key === 'ArrowRight') step(1);
+  if (e.key === 'ArrowLeft') step(-1);
+});
+// swipe left/right to change card, swipe down to close
+let sx = 0, sy = 0, st = 0;
+viewer.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
+viewer.addEventListener('touchend', e => {
+  const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
+  if (Date.now() - st > 800) return;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
+  else if (dy > 90 && Math.abs(dy) > Math.abs(dx) * 1.5) closeViewer();
+}, { passive: true });
+// tap on the dark area around the card closes it
+viewer.addEventListener('click', e => { if (e.target === viewer) closeViewer(); });
 
 /* opening: 5 seconds of moon, background and bats, then the page */
 function enter() {
@@ -347,7 +469,7 @@ $('replay').addEventListener('click', () => {
 if (reduceMotion) $('replay').style.visibility = 'hidden';
 // pause the animation while the cards are off-screen to save battery
 new IntersectionObserver(([e]) => {
-  visible = e.isIntersecting;
+  visible = e.isIntersecting || viewing;
   if (!visible) { pause(cards[active]); cancelAnimationFrame(raf); raf = 0; } else run();
 }).observe(deck);
 

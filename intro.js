@@ -12,7 +12,7 @@
     cv = document.createElement('canvas');
     cv.id = 'intro';
     cv.setAttribute('aria-hidden', 'true');
-    Object.assign(cv.style, { position: 'fixed', inset: '0', width: '100%', height: '100%', zIndex: '30', pointerEvents: 'none', display: 'none' });
+    Object.assign(cv.style, { position: 'fixed', inset: '0', width: '100%', height: '100%', zIndex: '70', pointerEvents: 'none', display: 'none' });
     document.body.appendChild(cv);
     ctx = cv.getContext('2d');
     window.addEventListener('resize', size);
