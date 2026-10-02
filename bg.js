@@ -11,7 +11,7 @@
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth; h = window.innerHeight;
+    w = cv.clientWidth || window.innerWidth; h = cv.clientHeight || window.innerHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     seedStars();

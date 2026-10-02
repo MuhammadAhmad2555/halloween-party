@@ -9,6 +9,8 @@
   const W = 1080, H = 1920, CX = 540;
   const TAU = Math.PI * 2;
   const INTRO = 3.4;
+  // the scene is drawn this far beyond the 1080x1920 card so it can fill any screen shape
+  const XMAX = 2200, YMAX = 1200;
   const CREAM = '#F1E6D0';
 
   const DEFAULT_PARTY = {
@@ -148,7 +150,7 @@
     const defs = el('defs');
     const sk = T.sky;
     defs.innerHTML = `
-      <linearGradient id="${id('sky')}" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="${id('sky')}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="${H}">
         <stop offset="0" stop-color="${sk[0]}"/><stop offset="0.3" stop-color="${sk[1]}"/>
         <stop offset="0.5" stop-color="${sk[2]}"/><stop offset="0.6" stop-color="${sk[3]}"/><stop offset="0.68" stop-color="${sk[4]}"/>
       </linearGradient>
@@ -182,13 +184,13 @@
         <stop offset="0" stop-color="#FF6A4A" stop-opacity="0.6"/><stop offset="0.4" stop-color="#E8302A" stop-opacity="0.2"/>
         <stop offset="1" stop-color="#E8302A" stop-opacity="0"/>
       </radialGradient>
-      <linearGradient id="${id('sea')}" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="${id('sea')}" gradientUnits="userSpaceOnUse" x1="0" y1="985" x2="0" y2="${H}">
         <stop offset="0" stop-color="#1A2E52"/><stop offset="0.12" stop-color="#0C1A34"/><stop offset="0.4" stop-color="#050C1A"/><stop offset="1" stop-color="#02050C"/>
       </linearGradient>
       <linearGradient id="${id('beam')}" x1="0" y1="0" x2="1" y2="0">
         <stop offset="0" stop-color="#FFF6D0" stop-opacity="0.55"/><stop offset="1" stop-color="#FFF6D0" stop-opacity="0"/>
       </linearGradient>
-      <linearGradient id="${id('darken')}" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="${id('darken')}" gradientUnits="userSpaceOnUse" x1="0" y1="1080" x2="0" y2="${H}">
         <stop offset="0" stop-color="${T.ground[1]}" stop-opacity="0"/><stop offset="0.25" stop-color="${T.ground[1]}" stop-opacity="0.85"/><stop offset="1" stop-color="${T.ground[2]}"/>
       </linearGradient>
       <radialGradient id="${id('brew')}" cx="0.5" cy="0.4" r="0.6">
@@ -207,7 +209,7 @@
       <linearGradient id="${id('title')}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="${T.title[0]}"/><stop offset="1" stop-color="${T.title[1]}"/>
       </linearGradient>
-      <linearGradient id="${id('groundFade')}" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="${id('groundFade')}" gradientUnits="userSpaceOnUse" x1="0" y1="1150" x2="0" y2="${H}">
         <stop offset="0" stop-color="${T.ground[0]}"/><stop offset="0.25" stop-color="${T.ground[1]}"/><stop offset="1" stop-color="${T.ground[2]}"/>
       </linearGradient>
       <radialGradient id="${id('vig')}" cx="0.5" cy="0.45" r="0.75">
@@ -296,16 +298,16 @@
     }
 
     function hills() {
-      el('path', { d: 'M0,955 C120,925 220,940 330,960 C430,975 520,930 640,925 C780,920 900,960 1080,935 L1080,1200 L0,1200Z', fill: T.far });
+      el('path', { d: `M${-XMAX},955 L0,955 C120,925 220,940 330,960 C430,975 520,930 640,925 C780,920 900,960 1080,935 L${W + XMAX},935 L${W + XMAX},1200 L${-XMAX},1200Z`, fill: T.far });
     }
     function backHill() {
-      el('path', { d: 'M0,1000 C150,965 260,990 380,1000 C480,1008 600,985 720,990 C860,995 960,1015 1080,990 L1080,1250 L0,1250Z', fill: T.back });
+      el('path', { d: `M${-XMAX},1000 L0,1000 C150,965 260,990 380,1000 C480,1008 600,985 720,990 C860,995 960,1015 1080,990 L${W + XMAX},990 L${W + XMAX},1250 L${-XMAX},1250Z`, fill: T.back });
     }
     function midHill() {
-      el('path', { d: 'M0,1062 C170,1030 330,1012 460,1018 C560,1022 620,1014 720,1020 C860,1030 960,1048 1080,1066 L1080,1300 L0,1300Z', fill: T.mid });
+      el('path', { d: `M${-XMAX},1062 L0,1062 C170,1030 330,1012 460,1018 C560,1022 620,1014 720,1020 C860,1030 960,1048 1080,1066 L${W + XMAX},1066 L${W + XMAX},1300 L${-XMAX},1300Z`, fill: T.mid });
     }
     function foreground() {
-      el('path', { d: 'M0,1178 C110,1150 250,1188 380,1172 C520,1154 640,1192 780,1174 C900,1160 1000,1182 1080,1166 L1080,1920 L0,1920Z', fill: url('groundFade') });
+      el('path', { d: `M${-XMAX},1178 L0,1178 C110,1150 250,1188 380,1172 C520,1154 640,1192 780,1174 C900,1160 1000,1182 1080,1166 L${W + XMAX},1166 L${W + XMAX},${H + YMAX} L${-XMAX},${H + YMAX}Z`, fill: url('groundFade') });
     }
     function clouds(seed) {
       const g = el('g', { fill: T.cloud });
@@ -326,7 +328,7 @@
     }
 
     /* ---------- sky ---------- */
-    el('rect', { width: W, height: H, fill: url('sky') });
+    el('rect', { x: -XMAX, y: -YMAX, width: W + 2 * XMAX, height: H + 2 * YMAX, fill: url('sky') });
     el('ellipse', { cx: CX, cy: 1000, rx: 760, ry: 260, fill: url('horizon') });
 
     (function stars() {
@@ -339,6 +341,13 @@
         const r = 0.8 + Math.pow(R(), 3) * 2.4, base = 0.25 + R() * 0.6;
         const c = el('circle', { cx: f2(x), cy: f2(y), r: f2(r), fill: CREAM, opacity: base }, g);
         list.push({ c, base, k: 0.3 + R() * 1.2, ph: R() * TAU });
+      }
+      const R2 = rng(7), extra = OPT.lite ? 120 : 160;
+      for (let i = 0; i < extra; i++) {
+        const x = -1500 + R2() * (W + 3000), y = -YMAX + R2() * (1000 + YMAX);
+        if (x > 0 && x < W && y > 0) continue;
+        const r = 0.8 + Math.pow(R2(), 3) * 2.4, base = 0.25 + R2() * 0.6;
+        list.push({ c: el('circle', { cx: f2(x), cy: f2(y), r: f2(r), fill: CREAM, opacity: base }, g), base, k: 0.3 + R2() * 1.2, ph: R2() * TAU });
       }
       anim.push(t => { for (const s of list) s.c.setAttribute('opacity', f2(s.base * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(TAU * s.k * t + s.ph))))); });
     })();
@@ -746,14 +755,14 @@
 
     function sceneVamp() {
       // lightning lights the sky behind the silhouettes
-      const flash = el('rect', { width: W, height: 1200, fill: '#FFE3E3', opacity: 0 });
+      const flash = el('rect', { x: -XMAX, y: -YMAX, width: W + 2 * XMAX, height: 1200 + YMAX, fill: '#FFE3E3', opacity: 0 });
       const bolt = el('path', { d: 'M820,0 L790,120 L830,130 L770,300 L812,306 L740,470 M790,300 L860,360', fill: 'none', stroke: '#FFF4F0', 'stroke-width': 4, 'stroke-linejoin': 'round', opacity: 0 });
       const strike = t => { const c = t % 7.5; return (c > 4.6 && c < 4.7) || (c > 4.82 && c < 5.0) ? (c < 4.7 ? 1 : 0.7) : 0; };
       anim.push(t => { const v = strike(t); flash.setAttribute('opacity', f2(v * 0.32)); bolt.setAttribute('opacity', f2(v)); });
       el('path', { d: 'M0,980 C150,950 260,965 380,975 C500,985 620,955 760,960 C900,965 980,985 1080,970 L1080,1200 L0,1200Z', fill: T.far });
       // cliffs and the bridge
-      el('path', { d: 'M0,712 L170,720 L178,760 L192,770 L196,820 L214,850 L216,910 L236,1000 L0,1000Z', fill: T.mid });
-      el('path', { d: 'M1080,690 L980,684 C900,692 860,730 820,756 L690,770 L676,800 L662,806 L650,850 L636,862 L626,910 L606,930 L596,980 L570,1000 L540,1050 L1080,1050Z', fill: T.mid });
+      el('path', { d: `M${-XMAX},712 L170,720 L178,760 L192,770 L196,820 L214,850 L216,910 L236,1000 L${-XMAX},1000Z`, fill: T.mid });
+      el('path', { d: `M${W + XMAX},690 L980,684 C900,692 860,730 820,756 L690,770 L676,800 L662,806 L650,850 L636,862 L626,910 L606,930 L596,980 L570,1000 L540,1050 L${W + XMAX},1050Z`, fill: T.mid });
       const br = el('g', { fill: T.mid });
       el('rect', { x: 170, y: 712, width: 530, height: 18 }, br);
       for (let i = 0; i < 4; i++) {
@@ -862,8 +871,8 @@
 
     function sceneShip() {
       const HZ = 985;
-      el('path', { d: `M0,${HZ} L0,930 C60,915 140,925 210,945 C260,958 300,970 340,${HZ}Z`, fill: T.far });
-      el('rect', { x: 0, y: HZ, width: W, height: H - HZ, fill: url('sea') });
+      el('path', { d: `M${-XMAX},${HZ} L${-XMAX},930 L0,930 C60,915 140,925 210,945 C260,958 300,970 340,${HZ}Z`, fill: T.far });
+      el('rect', { x: -XMAX, y: HZ, width: W + 2 * XMAX, height: H - HZ + YMAX, fill: url('sea') });
       // moonlight on the water
       const R = rng(55), streaks = [];
       for (let i = 0; i < 18; i++) {
@@ -919,7 +928,7 @@
         shipGlow.setAttribute('opacity', f2(0.6 + 0.4 * Math.sin(TAU * t * 1.4)));
       });
       el('path', { d: `M0,1150 C40,1120 90,1110 140,1130 C170,1150 190,1170 200,1200 L0,1200Z M1080,1140 C1030,1110 980,1112 940,1135 C920,1150 905,1175 900,1200 L1080,1200Z`, fill: T.sil });
-      el('rect', { x: 0, y: 1080, width: W, height: H - 1080, fill: url('darken') });
+      el('rect', { x: -XMAX, y: 1080, width: W + 2 * XMAX, height: H - 1080 + YMAX, fill: url('darken') });
       fogBand(1020, 6, 14, 80, 18, 0.55);
     }
 
@@ -1010,8 +1019,9 @@
     ({ manor: sceneManor, witch: sceneWitch, patch: scenePatch, grave: sceneGrave, vamp: sceneVamp, forest: sceneForest, ship: sceneShip, carnival: sceneCarnival })[theme]();
 
     /* ---------- cobwebs + spider ---------- */
+    const cornerL = el('g'), cornerR = el('g');
     function cobweb(sx) {
-      const ox = sx > 0 ? 0 : W, g = el('g', { fill: 'none', stroke: CREAM, opacity: 0.34, 'stroke-width': 1.3 });
+      const ox = sx > 0 ? 0 : W, g = el('g', { fill: 'none', stroke: CREAM, opacity: 0.34, 'stroke-width': 1.3 }, sx > 0 ? cornerL : cornerR);
       const spokes = [], L = 270;
       for (let i = 0; i <= 6; i++) {
         const a = (i / 6) * Math.PI / 2;
@@ -1032,7 +1042,7 @@
     }
     if (T.webs) { cobweb(1); cobweb(-1); }
     if (T.spider) (function spider() {
-      const g = el('g');
+      const g = el('g', {}, cornerR);
       const thread = el('path', { stroke: CREAM, 'stroke-width': 1.2, opacity: 0.5 }, g);
       const body = el('g', {}, g);
       const legs = 'M-6,-2 Q-18,-14 -26,-6 M-6,2 Q-20,-2 -28,8 M-6,5 Q-18,10 -24,22 M-5,8 Q-12,18 -14,30 M6,-2 Q18,-14 26,-6 M6,2 Q20,-2 28,8 M6,5 Q18,10 24,22 M5,8 Q12,18 14,30';
@@ -1050,7 +1060,7 @@
       });
     })();
 
-    el('rect', { x: 26, y: 26, width: W - 52, height: H - 52, rx: 26, fill: 'none', stroke: CREAM, 'stroke-width': 1.4, opacity: 0.22 });
+    const border = el('rect', { x: 26, y: 26, width: W - 52, height: H - 52, rx: 26, fill: 'none', stroke: CREAM, 'stroke-width': 1.4, opacity: 0.22 });
 
     /* ---------- text ---------- */
     const entries = [], fit = [];
@@ -1101,12 +1111,14 @@
     }
 
     /* ---------- finish ---------- */
-    el('rect', { width: W, height: H, fill: url('vig'), 'pointer-events': 'none' });
+    const fullRects = [];
+    fullRects.push(el('rect', { width: W, height: H, fill: url('vig'), 'pointer-events': 'none' }));
     if (OPT.grain) el('rect', { width: W, height: H, filter: url('grain'), opacity: 0.1, style: 'mix-blend-mode: overlay', 'pointer-events': 'none' });
 
     /* ---------- intro: darkness + bat swarm bursting from the moon ---------- */
     const dark = el('rect', { width: W, height: H, fill: url('introDark'), 'pointer-events': 'none' });
     const black = el('rect', { width: W, height: H, fill: '#05030A', 'pointer-events': 'none' });
+    fullRects.push(dark, black);
     const swarmG = el('g', { 'pointer-events': 'none' });
     const swarm = [];
     (function makeSwarm() {
@@ -1184,7 +1196,25 @@
     })();
 
     setTime(0);
-    return { setTime, ready, INTRO, width: W, height: H, theme, moon: { x: MOON.x / W, y: MOON.y / H, r: MOON.r / W } };
+    /* Fit the scene to any screen shape: wider screens see more of the landscape to the sides,
+       taller screens see more sky above and ground below. The card itself stays centred. */
+    let ex = 0, ey = 0;
+    function setAspect(ratio) {
+      ex = 0; ey = 0;
+      if (ratio > W / H) ex = Math.min(XMAX, (H * ratio - W) / 2); else ey = Math.min(YMAX, (W / ratio - H) / 2);
+      svg.setAttribute('viewBox', `${f2(-ex)} ${f2(-ey)} ${f2(W + 2 * ex)} ${f2(H + 2 * ey)}`);
+      cornerL.setAttribute('transform', ex || ey ? `translate(${f2(-ex)},${f2(-ey)})` : '');
+      cornerR.setAttribute('transform', ex || ey ? `translate(${f2(ex)},${f2(-ey)})` : '');
+      for (const r of fullRects) { r.setAttribute('x', f2(-ex)); r.setAttribute('y', f2(-ey)); r.setAttribute('width', f2(W + 2 * ex)); r.setAttribute('height', f2(H + 2 * ey)); }
+      border.setAttribute('x', f2(26 - ex)); border.setAttribute('y', f2(26 - ey));
+      border.setAttribute('width', f2(W - 52 + 2 * ex)); border.setAttribute('height', f2(H - 52 + 2 * ey));
+    }
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    // where the moon sits on screen, as a fraction of the drawn area (for the page-level bat intro)
+    function moonAt() { return { x: (MOON.x + ex) / (W + 2 * ex), y: (MOON.y + ey) / (H + 2 * ey) }; }
+
+    return { setTime, setAspect, ready, INTRO, width: W, height: H, theme, skyTop: T.sky[0],
+      get moon() { const m = moonAt(); return { x: m.x, y: m.y, r: MOON.r / (W + 2 * ex) }; } };
   }
 
   global.HauntCard = { create, batPath, INTRO, THEMES: Object.keys(THEMES), themeNames: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, v.name])) };

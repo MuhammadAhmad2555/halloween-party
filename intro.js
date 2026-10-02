@@ -12,14 +12,14 @@
     cv = document.createElement('canvas');
     cv.id = 'intro';
     cv.setAttribute('aria-hidden', 'true');
-    Object.assign(cv.style, { position: 'fixed', inset: '0', width: '100%', height: '100%', zIndex: '70', pointerEvents: 'none', display: 'none' });
+    Object.assign(cv.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: CSS.supports('height', '100lvh') ? '100lvh' : '100vh', zIndex: '70', pointerEvents: 'none', display: 'none' });
     document.body.appendChild(cv);
     ctx = cv.getContext('2d');
     window.addEventListener('resize', size);
   }
   function size() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth; h = window.innerHeight;
+    w = cv.clientWidth || window.innerWidth; h = cv.clientHeight || window.innerHeight;
     cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -89,7 +89,7 @@
 
   function play(ox, oy) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    setup(); size();
+    setup(); cv.style.display = 'block'; size();
     origin = [ox ?? w / 2, oy ?? h * 0.3];
     makeSwarm();
     cv.style.transition = 'none'; cv.style.opacity = '1'; cv.style.display = 'block';
@@ -99,7 +99,7 @@
   }
   /* Opening splash: only the big moon, the background and bats flying toward you. */
   function splash(seconds, onDone) {
-    setup(); size();
+    setup(); cv.style.display = 'block'; size();
     let done = false;
     const finish = () => { if (done) return; done = true; onDone && onDone(); };
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
