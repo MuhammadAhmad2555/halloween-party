@@ -325,7 +325,7 @@
     <p class="deck-name" id="deck-name"></p>
     <div class="hero-bar">
       <button class="link-btn" id="replay" type="button">↻ replay the bats</button>
-      <a class="link-btn" href="#details">details &amp; RSVP ↓</a>
+      <a class="link-btn" href="#details">details &amp; reply ↓</a>
     </div>
   </div>
 
@@ -378,7 +378,7 @@
   <button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="fab-menu">
     <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
     <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-    RSVP
+    Reply
   </button>
 </div>
 <div class="toast" id="toast">Link copied</div>
@@ -460,7 +460,7 @@ const cards = HauntCard.THEMES.map((theme, i) => {
 function build(i) {
   const c = cards[i];
   if (c && !c.card) {
-    c.card = HauntCard.create(c.svg, { theme: c.theme, lite: true, party, rsvp: INVITE < 0 }); // shared links leave the RSVP off the card
+    c.card = HauntCard.create(c.svg, { theme: c.theme, lite: true, party });
     c.card.ready.then(() => { if (c.clock === null) c.card.setTime(c.at); });
   }
   return c;
@@ -515,6 +515,8 @@ function setActive(i) {
   document.querySelectorAll('.dot').forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
   $('deck-name').textContent = `${HauntCard.themeNames[cards[i].theme]} · ${i + 1} of ${cards.length}`;
   $('prev').disabled = i === 0; $('next').disabled = i === cards.length - 1;
+  if (typeof updateReplies === 'function' && window.__repliesReady) updateReplies();
+window.__repliesReady = true;
   if (viewing) showInViewer();
 }
 deck.addEventListener('scroll', () => setActive(Math.round(deck.scrollLeft / deck.clientWidth)), { passive: true });
@@ -737,11 +739,10 @@ $('fab-cal').addEventListener('click', () => { setFab(false); addToCalendar(); }
 for (const id of ['fab-yes', 'fab-no', 'fab-map']) $(id).addEventListener('click', () => setTimeout(() => setFab(false), 300));
 
 if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
-  $('fab-yes').href = $('btn-yes').href; $('fab-no').href = $('btn-no').href; $('fab-map').href = $('btn-map').href;
+  updateReplies(); $('fab-map').href = $('btn-map').href;
   setTimeout(() => $('fab-wrap').classList.add('ready'), (HauntCard.INTRO + 0.4) * 1000); // appears once the intro has played
   document.body.classList.remove('locked', 'splash');
   entered = true;
-  $('act-rsvp').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
   openViewer();
   cards[INVITE].card.ready.then(replay);
 }, 0);
@@ -771,8 +772,15 @@ $('rsvp-by').textContent = PARTY.rsvpBy ? `${PARTY.rsvpBy}. Your reply goes to $
 
 /* ---------- RSVP via WhatsApp ---------- */
 const wa = text => `https://wa.me/${PARTY.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`; // empty number -> guest picks a chat
-$('btn-yes').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
-$('btn-no').href = wa(`Hello, sadly I cannot make it to ${PARTY.title} on ${PARTY.dateText}. Have a wonderfully spooky night! 🎃`);
+const replyYes = link => wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}.\nName: \n\nMy invitation: ${link}`);
+const replyNo = link => wa(`Hello, sadly I cannot make it to ${PARTY.title} on ${PARTY.dateText}. Have a wonderfully spooky night! 🎃\n\nMy invitation: ${link}`);
+function updateReplies() {
+  const link = cardLink(cards[active]);
+  $('btn-yes').href = replyYes(link); $('btn-no').href = replyNo(link);
+  $('fab-yes').href = replyYes(link); $('fab-no').href = replyNo(link);
+  $('act-rsvp').href = replyYes(link);
+}
+updateReplies();
 
 /* ---------- directions ---------- */
 $('btn-map').href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PARTY.mapsQuery)}`;

@@ -138,7 +138,7 @@
   function create(svg, opts = {}) {
     const T = THEMES[opts.theme] || THEMES.manor;
     const theme = THEMES[opts.theme] ? opts.theme : 'manor';
-    const OPT = { text: opts.text !== false, grain: !!opts.grain, lite: !!opts.lite, rsvp: opts.rsvp !== false };
+    const OPT = { text: opts.text !== false, grain: !!opts.grain, lite: !!opts.lite, rsvp: opts.rsvp === true }; // the RSVP box is off unless asked for
     const P = Object.assign({}, DEFAULT_PARTY, opts.party || {});
     const MOON = T.moon;
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
