@@ -28,6 +28,7 @@
   const THEMES = {
     manor: {
       font: ['Grenze Gotisch', 700],
+      detail: ['Grenze Gotisch', 600, false, 0.3], body: ['Grenze', 400, true],
       name: 'The Haunted Manor',
       sky: ['#0A0717', '#1A1030', '#2E1846', '#4A2350', '#5E2C4C'],
       moon: { x: 540, y: 700, r: 235, c: ['#FFF4D6', '#F8DC9C', '#EDB06A', '#D98A4C'], crater: '#C9824A', glow: ['#F6C47E', '#E8834A'] },
@@ -38,6 +39,7 @@
     },
     witch: {
       font: ['Mystery Quest', 400],
+      detail: ['Mystery Quest', 400, true, 0.5], body: ['Mystery Quest', 400, false],
       name: 'The Witching Hour',
       sky: ['#030C0D', '#08201F', '#0F3432', '#1D4A43', '#2B5A49'],
       moon: { x: 540, y: 690, r: 250, c: ['#F6FFEA', '#DDF2C4', '#AEDB9C', '#7DB47E'], crater: '#86B88A', glow: ['#C8F0B0', '#5FBF6A'] },
@@ -48,6 +50,7 @@
     },
     patch: {
       font: ['Creepster', 400],
+      detail: ['Creepster', 400, true, 0.5], body: ['Henny Penny', 400, false],
       name: 'The Pumpkin Patch',
       sky: ['#100508', '#2A0B13', '#521519', '#8E2F1D', '#C45B26'],
       moon: { x: 540, y: 800, r: 300, c: ['#FFF0C8', '#FFCF7A', '#F59D42', '#DA6A2A'], crater: '#D07A36', glow: ['#FFC070', '#FF6A2A'] },
@@ -58,6 +61,7 @@
     },
     grave: {
       font: ['Cinzel Decorative', 700],
+      detail: ['Cinzel Decorative', 700, true, 0.7], body: ['Cinzel Decorative', 400, false],
       name: 'The Restless Graveyard',
       sky: ['#050A16', '#0B1830', '#13284A', '#1E3A60', '#2A4A70'],
       moon: { x: 540, y: 690, r: 225, c: ['#F6FAFF', '#DCE8FA', '#AFC6E8', '#839FCB'], crater: '#90A8CE', glow: ['#D2E2FF', '#6F8FD0'] },
@@ -68,6 +72,7 @@
     },
     vamp: {
       font: ['UnifrakturMaguntia', 400],
+      detail: ['UnifrakturMaguntia', 400, false, 0.2], body: ['IM Fell English', 400, true],
       name: 'The Vampire\u2019s Castle',
       sky: ['#0A0204', '#1E0408', '#3A0710', '#5A0E16', '#6E1219'],
       moon: { x: 360, y: 640, r: 195, c: ['#FFE0D4', '#F7A08A', '#D24A3C', '#8E1E1C'], crater: '#A8322A', glow: ['#FF8A70', '#C21E1E'] },
@@ -78,6 +83,7 @@
     },
     forest: {
       font: ['Uncial Antiqua', 400],
+      detail: ['Uncial Antiqua', 400, true, 0.4], body: ['Uncial Antiqua', 400, false],
       name: 'The Whispering Woods',
       sky: ['#02080C', '#061820', '#0B2A33', '#123A40', '#1A4A48'],
       moon: { x: 540, y: 640, r: 190, c: ['#F5FFF8', '#D2F0E0', '#9ED2BC', '#6AA894'], crater: '#7EB8A2', glow: ['#BFF5DA', '#4FA88A'] },
@@ -88,6 +94,7 @@
     },
     ship: {
       font: ['Pirata One', 400],
+      detail: ['Pirata One', 400, false, 0.4], body: ['Pirata One', 400, false],
       name: 'The Ghost Ship',
       sky: ['#02060E', '#06122A', '#0C2042', '#163058', '#1F3C66'],
       moon: { x: 700, y: 640, r: 180, c: ['#FFFDF0', '#F2EFD6', '#CFCBAA', '#A8A27E'], crater: '#B5AF8A', glow: ['#F0EFD0', '#8A9AC0'] },
@@ -98,6 +105,7 @@
     },
     carnival: {
       font: ['Sancreek', 400],
+      detail: ['Sancreek', 400, true, 0.5], body: ['Rye', 400, false],
       name: 'The Haunted Carnival',
       sky: ['#0A0414', '#1C0A2E', '#33124A', '#4E1A5C', '#64205E'],
       moon: { x: 720, y: 600, r: 190, c: ['#FFF2FA', '#F6D2EA', '#D9A0C8', '#B070A0'], crater: '#C080B0', glow: ['#FFC8EC', '#C04FA0'] },
@@ -1072,6 +1080,14 @@
 
     /* ---------- text ---------- */
     const entries = [], fit = [];
+    // the card's own typefaces for the smaller lines
+    const DETAIL = `'${T.detail[0]}', serif`, BODY = `'${T.body[0]}', serif`;
+    const caps = (txt, sentence) => T.detail[2] ? txt.toUpperCase()
+      : sentence ? txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+      : txt.toLowerCase().replace(/(^|[\s·,-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+    const dls = n => Math.round(n * T.detail[3]);
+    const dl = (txt, y, size, ls, o = {}) => line(caps(txt, o.sentence), y, DETAIL, size, Object.assign({ weight: T.detail[1], ls: dls(ls) }, o));
+    const bl = (txt, y, size, o = {}) => line(txt, y, BODY, size, Object.assign({ weight: T.body[1], italic: T.body[2] }, o));
     function line(txt, y, family, size, o = {}) {
       const t = el('text', {
         x: CX, y, 'font-family': family, 'font-size': size, 'text-anchor': 'middle', fill: o.fill || CREAM,
@@ -1098,7 +1114,7 @@
 
     if (OPT.text) {
       const eg = el('g', {}, topText);
-      line(P.eyebrow, 150, CINZEL, 30, { weight: 600, ls: 9, parent: eg, max: 640 });
+      dl(P.eyebrow, 150, 32, 9, { parent: eg, max: 640, sentence: true });
       for (const sx of [-1, 1]) el('path', { d: batPath(0.6), fill: CREAM, transform: `translate(${CX + sx * 375},140) scale(0.36)` }, eg);
       reveal(eg, 1.9);
 
@@ -1113,11 +1129,11 @@
       reveal(tg, 2.1, 0.9, 30);
 
       const dg = el('g', {}, bottomText);
-      reveal(line(P.date, 1290, CINZEL, 56, { weight: 700, ls: 5, parent: dg, max: 860 }), 2.4);
-      reveal(line(P.time, 1356, CORM, 46, { italic: true, weight: 500, fill: T.soft, parent: dg, max: 860 }), 2.5);
-      reveal(line(P.venue, 1480, CINZEL, 50, { weight: 700, ls: 8, parent: dg, max: 860 }), 2.75);
-      reveal(line(P.address, 1536, CORM, 44, { italic: true, weight: 500, fill: T.soft, parent: dg, max: 860 }), 2.85);
-      reveal(line(P.note, 1616, CORM, 40, { italic: true, weight: 600, fill: T.accent, parent: dg, max: 880 }), 2.95);
+      reveal(dl(P.date, 1290, 62, 5, { parent: dg, max: 880 }), 2.4);
+      reveal(bl(P.time, 1356, 42, { fill: T.soft, parent: dg, max: 860 }), 2.5);
+      reveal(dl(P.venue, 1480, 56, 8, { parent: dg, max: 860 }), 2.75);
+      reveal(bl(P.address, 1536, 40, { fill: T.soft, parent: dg, max: 860 }), 2.85);
+      reveal(bl(P.note, 1616, 38, { fill: T.accent, parent: dg, max: 900 }), 2.95);
       if (OPT.rsvp) {
         reveal(line(P.rsvpLabel, 1726, CINZEL, 25, { weight: 600, ls: 6, fill: T.accent, parent: dg, max: 540 }), 3.1);
         reveal(line(P.rsvpNumber, 1776, CINZEL, 44, { weight: 700, ls: 4, parent: dg, max: 560 }), 3.15);
@@ -1198,6 +1214,8 @@
           document.fonts.load("700 50px 'Cinzel'"), document.fonts.load("600 50px 'Cinzel'"),
           document.fonts.load("italic 500 50px 'Cormorant Garamond'"), document.fonts.load("italic 600 50px 'Cormorant Garamond'"),
           document.fonts.load(`${T.font[1]} 50px '${T.font[0]}'`),
+          document.fonts.load(`${T.detail[1]} 50px '${T.detail[0]}'`),
+          document.fonts.load(`${T.body[2] ? 'italic ' : ''}${T.body[1]} 50px '${T.body[0]}'`),
         ]).catch(() => {});
         await document.fonts.ready;
       }
@@ -1249,6 +1267,6 @@
     create, batPath, INTRO, THEMES: Object.keys(THEMES),
     themeNames: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, v.name])),
     // per-theme look for the page around a card: title font + colours
-    themeStyle: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, { font: v.font, accent: v.accent, glow: v.titleGlow, title: v.title }])),
+    themeStyle: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, { font: v.font, detail: v.detail, body: v.body, accent: v.accent, glow: v.titleGlow, title: v.title, soft: v.soft }])),
   };
 })(window);
