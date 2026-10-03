@@ -31,10 +31,10 @@
 <style>
   :root { --bg: #0A0717; --cream: #F1E6D0; --soft: #E9DBC4; --ember: #E8834A; --line: rgba(241, 230, 208, .22); }
   * { box-sizing: border-box; }
-  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  html { background-color: var(--bg); -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; color: var(--cream); min-height: 100vh;
-    background: radial-gradient(ellipse 120% 60% at 50% 0%, #2E1846 0%, var(--bg) 70%) no-repeat, var(--bg);
+    background: transparent;
     font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 20px; line-height: 1.45;
     font-variant-ligatures: none; -webkit-font-smoothing: antialiased;
   }
@@ -158,7 +158,9 @@
   body.viewing { overflow: hidden; }
 
   /* ---------- animated Halloween backdrop ---------- */
-  #bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none; }
+  /* the night-sky glow lives on the fixed backdrop; its edges are pure --bg so phone bars blend in */
+  #bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse 140% 70% at 50% 42%, #2A1642 0%, #160D27 30%, var(--bg) 56%) var(--bg); }
   @supports (height: 100lvh) { #bg { height: 100lvh; } }
   .webs, .graveyard { position: fixed; z-index: 0; pointer-events: none; }
   .web { position: fixed; top: 0; width: clamp(120px, 28vw, 240px); height: auto; opacity: .3; z-index: 0; pointer-events: none; }
@@ -471,6 +473,7 @@ function fitViewer() {
   c.card.setFit(vcard.clientWidth, H, Math.max(0, top), Math.max(0, bottom));
   themeMeta.setAttribute('content', c.card.skyTop);          // tints the phone's status bar to match
   document.documentElement.style.backgroundColor = c.card.skyTop;
+  viewer.style.backgroundColor = c.card.skyTop; viewer.style.backgroundImage = 'none';
 }
 function unfit(c) { if (c && c.card) c.card.setAspect(9 / 16); }
 window.addEventListener('resize', () => { if (viewing) fitViewer(); });
