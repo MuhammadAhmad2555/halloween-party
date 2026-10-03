@@ -158,7 +158,7 @@
   body.viewing { overflow: hidden; }
   /* card-only page opened from a shared link: no password, no dashboard */
   body.invite main, body.invite .graveyard, body.invite .gate { display: none !important; }
-  body.invite .v-close, body.invite .v-prev, body.invite .v-next, body.invite #act-link { display: none; }
+  body.invite .vbtn, body.invite .v-label, body.invite .v-actions { display: none !important; }
   #act-rsvp { display: none; }
   body.invite #act-rsvp { display: flex; }
   body.invite #act-video { background: transparent; color: var(--cream); }
@@ -478,8 +478,9 @@ function fitViewer() {
   const c = cards[shownIdx];
   if (!c || !c.card) return;
   // keep the card's text clear of the top controls and the share bar; scenery fills behind them
-  const H = vcard.clientHeight, top = $('v-label').getBoundingClientRect().bottom + 6;
-  const bottom = H - document.querySelector('.v-actions').getBoundingClientRect().top + 6;
+  const H = vcard.clientHeight, bare = INVITE >= 0; // shared links show the card alone, no controls
+  const top = bare ? 0 : $('v-label').getBoundingClientRect().bottom + 6;
+  const bottom = bare ? 0 : H - document.querySelector('.v-actions').getBoundingClientRect().top + 6;
   c.card.setFit(vcard.clientWidth, H, Math.max(0, top), Math.max(0, bottom));
   themeMeta.setAttribute('content', c.card.skyTop);          // tints the phone's status bar to match
   document.documentElement.style.backgroundColor = c.card.skyTop;
