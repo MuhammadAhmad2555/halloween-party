@@ -163,6 +163,39 @@
   body.invite #act-rsvp { display: flex; }
   body.invite #act-video { background: transparent; color: var(--cream); }
 
+  /* ---------- floating RSVP button on shared card links ---------- */
+  .fab-wrap { display: none; }
+  body.invite .fab-wrap { display: block; }
+  .fab-scrim { position: fixed; inset: 0; z-index: 58; background: rgba(3, 2, 7, .45); opacity: 0; pointer-events: none; transition: opacity .25s;
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+  .fab-wrap.open .fab-scrim { opacity: 1; pointer-events: auto; }
+  .fab { position: fixed; z-index: 60; right: max(18px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: 8px; height: 58px; padding: 0 22px 0 18px; border: 0; border-radius: 999px; cursor: pointer;
+    background: linear-gradient(180deg, #F29A5E, #D9692F); color: #1A0B06; font: 700 14px 'Cinzel', serif; letter-spacing: 2px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 220, 180, .25) inset, 0 0 26px rgba(232, 131, 74, .45);
+    -webkit-tap-highlight-color: transparent; opacity: 0; transform: translateY(20px) scale(.9); pointer-events: none;
+    transition: opacity .5s ease, transform .5s cubic-bezier(.2, .9, .3, 1.3); }
+  .fab-wrap.ready .fab { opacity: 1; transform: none; pointer-events: auto; }
+  .fab svg { width: 22px; height: 22px; transition: transform .25s; }
+  .fab .x { display: none; }
+  .fab-wrap.open .fab .x { display: block; } .fab-wrap.open .fab .m { display: none; }
+  .fab-wrap.ready:not(.open) .fab { animation: fabpulse 2.6s ease-in-out 1s infinite; }
+  @keyframes fabpulse { 50% { box-shadow: 0 8px 30px rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 220, 180, .25) inset, 0 0 44px rgba(232, 131, 74, .8); } }
+  .fab-menu { position: fixed; z-index: 59; right: max(18px, env(safe-area-inset-right)); bottom: calc(max(20px, env(safe-area-inset-bottom)) + 72px);
+    display: grid; gap: 10px; justify-items: end; pointer-events: none; }
+  .fab-item { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 20px 0 16px; border-radius: 999px; text-decoration: none; cursor: pointer;
+    background: rgba(14, 9, 26, .9); color: var(--cream); border: 1px solid rgba(241, 230, 208, .25); font: 700 13px 'Cinzel', serif; letter-spacing: 1.6px;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-tap-highlight-color: transparent;
+    opacity: 0; transform: translateY(16px) scale(.95); transition: opacity .22s ease, transform .22s ease; white-space: nowrap; }
+  .fab-item svg { width: 20px; height: 20px; flex: none; }
+  .fab-item.yes { background: linear-gradient(180deg, #F29A5E, #D9692F); color: #1A0B06; border-color: transparent; }
+  .fab-wrap.open .fab-menu { pointer-events: auto; }
+  .fab-wrap.open .fab-item { opacity: 1; transform: none; }
+  .fab-wrap.open .fab-item:nth-child(3) { transition-delay: .04s; } .fab-wrap.open .fab-item:nth-child(2) { transition-delay: .08s; }
+  .fab-wrap.open .fab-item:nth-child(1) { transition-delay: .12s; }
+  .fab-item:active { transform: scale(.97); }
+  @media (prefers-reduced-motion: reduce) { .fab, .fab-item { transition: none; } .fab-wrap.ready:not(.open) .fab { animation: none; } }
+
   /* ---------- animated Halloween backdrop ---------- */
   /* the night-sky glow lives on the fixed backdrop; its edges are pure --bg so phone bars blend in */
   #bg { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; pointer-events: none;
@@ -331,6 +364,20 @@
 
   <footer>HOLLOW HOUSE · XXXI · X</footer>
 </main>
+<div class="fab-wrap" id="fab-wrap">
+  <div class="fab-scrim" id="fab-scrim"></div>
+  <nav class="fab-menu" id="fab-menu" aria-label="Reply to the invitation">
+    <a class="fab-item yes" id="fab-yes" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>I will attend</a>
+    <a class="fab-item" id="fab-no" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>I can't attend</a>
+    <button class="fab-item" id="fab-cal" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Add to calendar</button>
+    <a class="fab-item" id="fab-map" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Directions</a>
+  </nav>
+  <button class="fab" id="fab" type="button" aria-expanded="false" aria-controls="fab-menu">
+    <svg class="m" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9 6 9-6"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+    <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    RSVP
+  </button>
+</div>
 <div class="toast" id="toast">Link copied</div>
 
 <script src="art.js"></script>
@@ -480,7 +527,7 @@ function fitViewer() {
   // keep the card's text clear of the top controls and the share bar; scenery fills behind them
   const H = vcard.clientHeight, bare = INVITE >= 0; // shared links show the card alone, no controls
   const top = bare ? 0 : $('v-label').getBoundingClientRect().bottom + 6;
-  const bottom = bare ? 0 : H - document.querySelector('.v-actions').getBoundingClientRect().top + 6;
+  const bottom = bare ? 84 : H - document.querySelector('.v-actions').getBoundingClientRect().top + 6; // shared links: room for the RSVP button
   c.card.setFit(vcard.clientWidth, H, Math.max(0, top), Math.max(0, bottom));
   themeMeta.setAttribute('content', c.card.skyTop);          // tints the phone's status bar to match
   document.documentElement.style.backgroundColor = c.card.skyTop;
@@ -664,7 +711,20 @@ $('gate-form').addEventListener('submit', async e => {
     input.value = ''; input.focus();
   }
 });
+/* floating RSVP menu on shared card links */
+function setFab(open) {
+  $('fab-wrap').classList.toggle('open', open);
+  $('fab').setAttribute('aria-expanded', String(open));
+}
+$('fab').addEventListener('click', () => setFab(!$('fab-wrap').classList.contains('open')));
+$('fab-scrim').addEventListener('click', () => setFab(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') setFab(false); });
+$('fab-cal').addEventListener('click', () => { setFab(false); addToCalendar(); });
+for (const id of ['fab-yes', 'fab-no', 'fab-map']) $(id).addEventListener('click', () => setTimeout(() => setFab(false), 300));
+
 if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
+  $('fab-yes').href = $('btn-yes').href; $('fab-no').href = $('btn-no').href; $('fab-map').href = $('btn-map').href;
+  setTimeout(() => $('fab-wrap').classList.add('ready'), (HauntCard.INTRO + 0.4) * 1000); // appears once the intro has played
   document.body.classList.remove('locked', 'splash');
   entered = true;
   $('act-rsvp').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
@@ -737,7 +797,7 @@ function buildICS() {
     'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
 }
-$('btn-cal').addEventListener('click', () => {
+function addToCalendar() {
   const ics = buildICS();
   const iOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   if (iOS) { location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); return; }
@@ -745,7 +805,8 @@ $('btn-cal').addEventListener('click', () => {
   const a = Object.assign(document.createElement('a'), { href: url, download: 'halloween-party.ics' });
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
-});
+}
+$('btn-cal').addEventListener('click', addToCalendar);
 
 /* ---------- share ---------- */
 $('btn-share').addEventListener('click', async () => {
