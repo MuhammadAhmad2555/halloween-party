@@ -27,6 +27,7 @@
 
   const THEMES = {
     manor: {
+      font: ['Grenze Gotisch', 700],
       name: 'The Haunted Manor',
       sky: ['#0A0717', '#1A1030', '#2E1846', '#4A2350', '#5E2C4C'],
       moon: { x: 540, y: 700, r: 235, c: ['#FFF4D6', '#F8DC9C', '#EDB06A', '#D98A4C'], crater: '#C9824A', glow: ['#F6C47E', '#E8834A'] },
@@ -36,6 +37,7 @@
       webs: true, spider: true, cloud: null,
     },
     witch: {
+      font: ['Mystery Quest', 400],
       name: 'The Witching Hour',
       sky: ['#030C0D', '#08201F', '#0F3432', '#1D4A43', '#2B5A49'],
       moon: { x: 540, y: 690, r: 250, c: ['#F6FFEA', '#DDF2C4', '#AEDB9C', '#7DB47E'], crater: '#86B88A', glow: ['#C8F0B0', '#5FBF6A'] },
@@ -45,6 +47,7 @@
       webs: true, spider: true, cloud: '#0A2422',
     },
     patch: {
+      font: ['Creepster', 400],
       name: 'The Pumpkin Patch',
       sky: ['#100508', '#2A0B13', '#521519', '#8E2F1D', '#C45B26'],
       moon: { x: 540, y: 800, r: 300, c: ['#FFF0C8', '#FFCF7A', '#F59D42', '#DA6A2A'], crater: '#D07A36', glow: ['#FFC070', '#FF6A2A'] },
@@ -54,6 +57,7 @@
       webs: false, spider: false, cloud: '#2B0A0E',
     },
     grave: {
+      font: ['Cinzel Decorative', 700],
       name: 'The Restless Graveyard',
       sky: ['#050A16', '#0B1830', '#13284A', '#1E3A60', '#2A4A70'],
       moon: { x: 540, y: 690, r: 225, c: ['#F6FAFF', '#DCE8FA', '#AFC6E8', '#839FCB'], crater: '#90A8CE', glow: ['#D2E2FF', '#6F8FD0'] },
@@ -63,6 +67,7 @@
       webs: false, spider: false, cloud: '#0A1426',
     },
     vamp: {
+      font: ['UnifrakturMaguntia', 400],
       name: 'The Vampire\u2019s Castle',
       sky: ['#0A0204', '#1E0408', '#3A0710', '#5A0E16', '#6E1219'],
       moon: { x: 360, y: 640, r: 195, c: ['#FFE0D4', '#F7A08A', '#D24A3C', '#8E1E1C'], crater: '#A8322A', glow: ['#FF8A70', '#C21E1E'] },
@@ -72,6 +77,7 @@
       webs: false, spider: false, cloud: '#1A0306',
     },
     forest: {
+      font: ['Uncial Antiqua', 400],
       name: 'The Whispering Woods',
       sky: ['#02080C', '#061820', '#0B2A33', '#123A40', '#1A4A48'],
       moon: { x: 540, y: 640, r: 190, c: ['#F5FFF8', '#D2F0E0', '#9ED2BC', '#6AA894'], crater: '#7EB8A2', glow: ['#BFF5DA', '#4FA88A'] },
@@ -81,6 +87,7 @@
       webs: true, spider: true, cloud: null,
     },
     ship: {
+      font: ['Pirata One', 400],
       name: 'The Ghost Ship',
       sky: ['#02060E', '#06122A', '#0C2042', '#163058', '#1F3C66'],
       moon: { x: 700, y: 640, r: 180, c: ['#FFFDF0', '#F2EFD6', '#CFCBAA', '#A8A27E'], crater: '#B5AF8A', glow: ['#F0EFD0', '#8A9AC0'] },
@@ -90,6 +97,7 @@
       webs: false, spider: false, cloud: '#08132A',
     },
     carnival: {
+      font: ['Sancreek', 400],
       name: 'The Haunted Carnival',
       sky: ['#0A0414', '#1C0A2E', '#33124A', '#4E1A5C', '#64205E'],
       moon: { x: 720, y: 600, r: 190, c: ['#FFF2FA', '#F6D2EA', '#D9A0C8', '#B070A0'], crater: '#C080B0', glow: ['#FFC8EC', '#C04FA0'] },
@@ -1075,7 +1083,7 @@
       return t;
     }
     function reveal(node, at, dur = 0.7, rise = 22) { entries.push({ node, at, dur, rise }); }
-    const CINZEL = "'Cinzel', serif", CORM = "'Cormorant Garamond', serif", GOTH = "'Grenze Gotisch', serif";
+    const CINZEL = "'Cinzel', serif", CORM = "'Cormorant Garamond', serif";
 
     const topText = el('g'), bottomText = el('g');
     const pill = el('g', {}, bottomText);
@@ -1096,10 +1104,12 @@
 
       const tg = el('g', {}, topText);
       const glow = el('g', { filter: url('titleGlow'), opacity: 0.75 }, tg);
-      line(P.title1, 292, GOTH, 150, { fill: T.titleGlow, weight: 700, parent: glow, max: 920 });
-      line(P.title2, 442, GOTH, 176, { fill: T.titleGlow, weight: 700, parent: glow, max: 920 });
-      line(P.title1, 292, GOTH, 150, { fill: url('title'), weight: 700, parent: tg, max: 920 });
-      line(P.title2, 442, GOTH, 176, { fill: url('title'), weight: 700, parent: tg, max: 920 });
+      // each theme has its own title typeface
+      const TF = `'${T.font[0]}', serif`, TW = T.font[1];
+      line(P.title1, 292, TF, 150, { fill: T.titleGlow, weight: TW, parent: glow, max: 920 });
+      line(P.title2, 442, TF, 176, { fill: T.titleGlow, weight: TW, parent: glow, max: 920 });
+      line(P.title1, 292, TF, 150, { fill: url('title'), weight: TW, parent: tg, max: 920 });
+      line(P.title2, 442, TF, 176, { fill: url('title'), weight: TW, parent: tg, max: 920 });
       reveal(tg, 2.1, 0.9, 30);
 
       const dg = el('g', {}, bottomText);
@@ -1187,7 +1197,7 @@
         await Promise.all([
           document.fonts.load("700 50px 'Cinzel'"), document.fonts.load("600 50px 'Cinzel'"),
           document.fonts.load("italic 500 50px 'Cormorant Garamond'"), document.fonts.load("italic 600 50px 'Cormorant Garamond'"),
-          document.fonts.load("700 50px 'Grenze Gotisch'"),
+          document.fonts.load(`${T.font[1]} 50px '${T.font[0]}'`),
         ]).catch(() => {});
         await document.fonts.ready;
       }
@@ -1235,5 +1245,10 @@
       get moon() { const m = moonAt(); return { x: m.x, y: m.y, r: MOON.r / (W + 2 * ex) }; } };
   }
 
-  global.HauntCard = { create, batPath, INTRO, THEMES: Object.keys(THEMES), themeNames: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, v.name])) };
+  global.HauntCard = {
+    create, batPath, INTRO, THEMES: Object.keys(THEMES),
+    themeNames: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, v.name])),
+    // per-theme look for the page around a card: title font + colours
+    themeStyle: Object.fromEntries(Object.entries(THEMES).map(([k, v]) => [k, { font: v.font, accent: v.accent, glow: v.titleGlow, title: v.title }])),
+  };
 })(window);
