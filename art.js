@@ -1198,22 +1198,30 @@
     setTime(0);
     /* Fit the scene to any screen shape: wider screens see more of the landscape to the sides,
        taller screens see more sky above and ground below. The card itself stays centred. */
-    let ex = 0, ey = 0;
-    function setAspect(ratio) {
-      ex = 0; ey = 0;
-      if (ratio > W / H) ex = Math.min(XMAX, (H * ratio - W) / 2); else ey = Math.min(YMAX, (W / ratio - H) / 2);
-      svg.setAttribute('viewBox', `${f2(-ex)} ${f2(-ey)} ${f2(W + 2 * ex)} ${f2(H + 2 * ey)}`);
-      cornerL.setAttribute('transform', ex || ey ? `translate(${f2(-ex)},${f2(-ey)})` : '');
-      cornerR.setAttribute('transform', ex || ey ? `translate(${f2(ex)},${f2(-ey)})` : '');
-      for (const r of fullRects) { r.setAttribute('x', f2(-ex)); r.setAttribute('y', f2(-ey)); r.setAttribute('width', f2(W + 2 * ex)); r.setAttribute('height', f2(H + 2 * ey)); }
-      border.setAttribute('x', f2(26 - ex)); border.setAttribute('y', f2(26 - ey));
-      border.setAttribute('width', f2(W - 52 + 2 * ex)); border.setAttribute('height', f2(H - 52 + 2 * ey));
+    let ex = 0, ey = 0, eyT = 0;
+    /* Fit to a screen of pw x ph pixels, keeping the card itself clear of overlays that cover
+       `top` / `bottom` pixels; the scenery still runs underneath them. */
+    function setFit(pw, ph, top = 0, bottom = 0) {
+      const ah = Math.max(1, ph - top - bottom);
+      const sc = Math.min(pw / W, ah / H);
+      const vw = pw / sc, vh = ph / sc;
+      ex = Math.min(XMAX, (vw - W) / 2);
+      eyT = Math.min(YMAX, top / sc + (ah / sc - H) / 2);
+      ey = Math.min(YMAX, vh - H - eyT);
+      const x0 = -ex, y0 = -eyT, w = W + 2 * ex, h = H + eyT + ey;
+      svg.setAttribute('viewBox', `${f2(x0)} ${f2(y0)} ${f2(w)} ${f2(h)}`);
+      cornerL.setAttribute('transform', ex || eyT ? `translate(${f2(-ex)},${f2(-eyT)})` : '');
+      cornerR.setAttribute('transform', ex || eyT ? `translate(${f2(ex)},${f2(-eyT)})` : '');
+      for (const r of fullRects) { r.setAttribute('x', f2(x0)); r.setAttribute('y', f2(y0)); r.setAttribute('width', f2(w)); r.setAttribute('height', f2(h)); }
+      border.setAttribute('x', f2(26 - ex)); border.setAttribute('y', f2(26 - eyT));
+      border.setAttribute('width', f2(w - 52)); border.setAttribute('height', f2(h - 52));
     }
+    function setAspect(ratio) { if (ratio > W / H) setFit(H * ratio, H); else setFit(W, W / ratio); }
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // where the moon sits on screen, as a fraction of the drawn area (for the page-level bat intro)
-    function moonAt() { return { x: (MOON.x + ex) / (W + 2 * ex), y: (MOON.y + ey) / (H + 2 * ey) }; }
+    function moonAt() { return { x: (MOON.x + ex) / (W + 2 * ex), y: (MOON.y + eyT) / (H + eyT + ey) }; }
 
-    return { setTime, setAspect, ready, INTRO, width: W, height: H, theme, skyTop: T.sky[0],
+    return { setTime, setAspect, setFit, ready, INTRO, width: W, height: H, theme, skyTop: T.sky[0],
       get moon() { const m = moonAt(); return { x: m.x, y: m.y, r: MOON.r / (W + 2 * ex) }; } };
   }
 

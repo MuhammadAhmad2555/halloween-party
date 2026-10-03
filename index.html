@@ -126,7 +126,7 @@
   .viewer-card { position: absolute; inset: 0; overflow: hidden; background: #05030A; }
   @supports (height: 100lvh) {
     .viewer { height: 100lvh; }  /* reach behind mobile browser toolbars */
-    .v-label { margin-bottom: calc(100lvh - 100svh); }
+    .v-actions { margin-bottom: calc(100lvh - 100svh); }
   }
   .viewer-card svg.art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .vbtn { position: absolute; z-index: 3; width: 46px; height: 46px; border-radius: 50%; border: 1px solid rgba(241, 230, 208, .35);
@@ -138,9 +138,23 @@
   .v-replay { top: max(14px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); }
   .v-prev, .v-next { top: 50%; transform: translateY(-50%); }
   .v-prev { left: max(10px, env(safe-area-inset-left)); } .v-next { right: max(10px, env(safe-area-inset-right)); }
-  .v-label { position: absolute; z-index: 3; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%); white-space: nowrap;
-    padding: 6px 14px; border-radius: 999px; background: rgba(5, 3, 10, .55); color: var(--soft); font: italic 500 16px 'Cormorant Garamond', serif;
+  .v-label { position: absolute; z-index: 3; left: 50%; top: calc(max(14px, env(safe-area-inset-top)) + 10px); transform: translateX(-50%); white-space: nowrap;
+    max-width: calc(100% - 140px); overflow: hidden; text-overflow: ellipsis; margin: 0;
+    padding: 5px 14px; border-radius: 999px; background: rgba(5, 3, 10, .55); color: var(--soft); font: italic 500 16px 'Cormorant Garamond', serif;
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  /* share / download / video */
+  .v-actions { position: absolute; z-index: 3; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    display: flex; gap: 8px; padding: 8px; border-radius: 999px; background: rgba(5, 3, 10, .62); border: 1px solid rgba(241, 230, 208, .18);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); max-width: calc(100% - 24px); }
+  .v-act { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 84px; height: 58px; padding: 0 10px;
+    border: 0; border-radius: 999px; background: transparent; color: var(--cream); cursor: pointer; font: 700 10.5px 'Cinzel', serif; letter-spacing: 1.2px;
+    -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+  .v-act svg { width: 22px; height: 22px; }
+  .v-act:hover, .v-act:focus-visible { background: rgba(241, 230, 208, .1); }
+  .v-act:active { transform: scale(.96); }
+  .v-act.primary { background: linear-gradient(180deg, #F29A5E, #D9692F); color: #1A0B06; }
+  .v-act[aria-busy="true"] { opacity: .6; pointer-events: none; }
+  @media (max-width: 340px) { .v-act { min-width: 72px; padding: 0 6px; font-size: 9.5px; } }
   body.viewing { overflow: hidden; }
 
   /* ---------- animated Halloween backdrop ---------- */
@@ -160,7 +174,7 @@
   @keyframes flicker { 0%, 100% { opacity: .95; } 20% { opacity: .7; } 22% { opacity: .9; } 50% { opacity: .78; } 70% { opacity: 1; } 72% { opacity: .65; } }
   @keyframes glowp { 0%, 100% { opacity: .55; } 50% { opacity: .85; } }
   main { position: relative; z-index: 1; padding-bottom: calc(clamp(80px, 12.5vw, 240px) + 20px + env(safe-area-inset-bottom)); }
-  .toast { z-index: 2; }
+  .toast { z-index: 90; }
   /* opening splash: hide the page until the moon-and-bats intro finishes */
   main { transition: opacity .9s ease, transform .9s ease; }
   body.splash main { opacity: 0; transform: translateY(16px); pointer-events: none; }
@@ -231,6 +245,11 @@
   <button class="vbtn v-prev" id="v-prev" type="button" aria-label="Previous card">‹</button>
   <button class="vbtn v-next" id="v-next" type="button" aria-label="Next card">›</button>
   <p class="v-label" id="v-label"></p>
+  <div class="v-actions" role="group" aria-label="Share this card">
+    <button class="v-act" id="act-link" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.2 1.2M14 10a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg>SHARE LINK</button>
+    <button class="v-act" id="act-png" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>SAVE PNG</button>
+    <button class="v-act primary" id="act-video" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>SEND VIDEO</button>
+  </div>
 </div>
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
   <div class="gate-box">
@@ -446,7 +465,10 @@ const themeMeta = document.querySelector('meta[name="theme-color"]');
 function fitViewer() {
   const c = cards[shownIdx];
   if (!c || !c.card) return;
-  c.card.setAspect(vcard.clientWidth / Math.max(1, vcard.clientHeight));
+  // keep the card's text clear of the top controls and the share bar; scenery fills behind them
+  const H = vcard.clientHeight, top = $('v-label').getBoundingClientRect().bottom + 6;
+  const bottom = H - document.querySelector('.v-actions').getBoundingClientRect().top + 6;
+  c.card.setFit(vcard.clientWidth, H, Math.max(0, top), Math.max(0, bottom));
   themeMeta.setAttribute('content', c.card.skyTop);          // tints the phone's status bar to match
   document.documentElement.style.backgroundColor = c.card.skyTop;
 }
@@ -459,6 +481,7 @@ function showInViewer() {
   vcard.appendChild(c.svg);
   shownIdx = active;
   fitViewer();
+  if (location.protocol !== 'file:') videoBlob(c).catch(() => {});
   $('v-label').textContent = `${HauntCard.themeNames[c.theme]} · ${active + 1} of ${cards.length}`;
   $('v-prev').disabled = active === 0; $('v-next').disabled = active === cards.length - 1;
 }
@@ -497,6 +520,53 @@ $('v-close').addEventListener('click', () => closeViewer());
 $('v-prev').addEventListener('click', () => step(-1));
 $('v-next').addEventListener('click', () => step(1));
 $('v-replay').addEventListener('click', replay);
+
+/* ---------- share this card: link, PNG, or video ---------- */
+function toast(text) { const t = $('toast'); t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
+const cardName = c => HauntCard.themeNames[c.theme];
+const fileBase = c => `halloween-invitation-${cardName(c).toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')}`;
+function cardLink(c) { const u = new URL(location.href); u.search = `?card=${c.theme}`; u.hash = ''; return u.toString(); }
+function saveFile(href, name) { const a = Object.assign(document.createElement('a'), { href, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
+// the current card's video is fetched ahead of time, so the share sheet opens straight away when tapped
+const videoCache = new Map();
+function videoBlob(c) {
+  if (!videoCache.has(c.theme)) videoCache.set(c.theme, fetch(`cards/${c.theme}.mp4`).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); })
+    .catch(e => { videoCache.delete(c.theme); throw e; }));
+  return videoCache.get(c.theme);
+}
+$('act-link').addEventListener('click', async () => {
+  const c = cards[active], url = cardLink(c);
+  const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url };
+  try {
+    if (navigator.share) { await navigator.share(data); return; }
+    await navigator.clipboard.writeText(url); toast('Link copied');
+  } catch (e) { if (e.name !== 'AbortError') { prompt('Copy this link:', url); } }
+});
+$('act-png').addEventListener('click', () => {
+  const c = cards[active];
+  saveFile(`cards/${c.theme}.png`, `${fileBase(c)}.png`);
+  toast('Saving the image…');
+});
+$('act-video').addEventListener('click', async () => {
+  const c = cards[active], btn = $('act-video'), name = `${fileBase(c)}.mp4`;
+  btn.setAttribute('aria-busy', 'true');
+  try {
+    const blob = await videoBlob(c);
+    const file = new File([blob], name, { type: 'video/mp4' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇 ${cardLink(c)}` }); }
+      catch (e) {
+        if (e.name === 'NotAllowedError') toast('Video ready. Tap Send video again');
+        else if (e.name !== 'AbortError') throw e;
+      }
+    } else {
+      const u = URL.createObjectURL(blob); saveFile(u, name); setTimeout(() => URL.revokeObjectURL(u), 4000);
+      toast('Video downloaded. Attach it in WhatsApp');
+    }
+  } catch (e) {
+    saveFile(`cards/${c.theme}.mp4`, name); toast('Downloading the video…');
+  } finally { btn.removeAttribute('aria-busy'); }
+});
 window.addEventListener('popstate', () => closeViewer(true));
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && viewing && !document.webkitFullscreenElement) { /* user left fullscreen with a system gesture; keep the overlay open */ } });
 document.addEventListener('keydown', e => {
