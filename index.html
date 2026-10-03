@@ -148,7 +148,7 @@
     -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); max-width: calc(100% - 24px); }
   .v-act { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 84px; height: 58px; padding: 0 10px;
     border: 0; border-radius: 999px; background: transparent; color: var(--cream); cursor: pointer; font: 700 10.5px 'Cinzel', serif; letter-spacing: 1.2px;
-    -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+    -webkit-tap-highlight-color: transparent; white-space: nowrap; text-decoration: none; }
   .v-act svg { width: 22px; height: 22px; }
   .v-act:hover, .v-act:focus-visible { background: rgba(241, 230, 208, .1); }
   .v-act:active { transform: scale(.96); }
@@ -156,6 +156,12 @@
   .v-act[aria-busy="true"] { opacity: .6; pointer-events: none; }
   @media (max-width: 340px) { .v-act { min-width: 72px; padding: 0 6px; font-size: 9.5px; } }
   body.viewing { overflow: hidden; }
+  /* card-only page opened from a shared link: no password, no dashboard */
+  body.invite main, body.invite .graveyard, body.invite .gate { display: none !important; }
+  body.invite .v-close, body.invite .v-prev, body.invite .v-next, body.invite #act-link { display: none; }
+  #act-rsvp { display: none; }
+  body.invite #act-rsvp { display: flex; }
+  body.invite #act-video { background: transparent; color: var(--cream); }
 
   /* ---------- animated Halloween backdrop ---------- */
   /* the night-sky glow lives on the fixed backdrop; its edges are pure --bg so phone bars blend in */
@@ -216,6 +222,7 @@
 </style>
 </head>
 <body class="splash locked">
+<script>if (/[?&]invite=/.test(location.search)) document.body.className = 'invite';</script>
 <canvas id="bg" aria-hidden="true"></canvas>
 <svg class="web l" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
 <svg class="web r" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
@@ -248,6 +255,7 @@
   <button class="vbtn v-next" id="v-next" type="button" aria-label="Next card">›</button>
   <p class="v-label" id="v-label"></p>
   <div class="v-actions" role="group" aria-label="Share this card">
+    <a class="v-act primary" id="act-rsvp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12z"/><path d="M9 10.5c.5 2 2.5 4 4.5 4.5l1.2-1.2 1.8.8"/></svg>RSVP</a>
     <button class="v-act" id="act-link" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.2 1.2M14 10a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg>SHARE LINK</button>
     <button class="v-act" id="act-png" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>SAVE PNG</button>
     <button class="v-act primary" id="act-video" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>SEND VIDEO</button>
@@ -452,8 +460,10 @@ deck.addEventListener('scroll', () => setActive(Math.round(deck.scrollLeft / dec
 $('prev').addEventListener('click', () => go(active - 1));
 $('next').addEventListener('click', () => go(active + 1));
 
+// ?invite=witch: a shared link, showing only that card (no password)
+const INVITE = cards.findIndex(c => c.theme === new URLSearchParams(location.search).get('invite'));
 // ?card=witch (or a number) opens a particular card first
-const want = new URLSearchParams(location.search).get('card');
+const want = INVITE >= 0 ? cards[INVITE].theme : new URLSearchParams(location.search).get('card');
 const startIdx = Math.max(0, cards.findIndex((c, i) => c.theme === want || String(i + 1) === want));
 active = startIdx;
 setActive(startIdx);
@@ -485,7 +495,7 @@ function showInViewer() {
   shownIdx = active;
   fitViewer();
   if (location.protocol !== 'file:') videoBlob(c).catch(() => {});
-  $('v-label').textContent = `${HauntCard.themeNames[c.theme]} · ${active + 1} of ${cards.length}`;
+  $('v-label').textContent = INVITE >= 0 ? HauntCard.themeNames[c.theme] : `${HauntCard.themeNames[c.theme]} · ${active + 1} of ${cards.length}`;
   $('v-prev').disabled = active === 0; $('v-next').disabled = active === cards.length - 1;
 }
 function openViewer() {
@@ -495,12 +505,13 @@ function openViewer() {
   viewer.classList.add('open');
   showInViewer();
   visible = true; run();
+  if (INVITE >= 0) return;
   history.pushState({ viewer: 1 }, '');
   const fs = viewer.requestFullscreen || viewer.webkitRequestFullscreen;
   if (fs && !/iPhone|iPod/.test(navigator.userAgent)) { try { const p = fs.call(viewer); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 }
 function closeViewer(fromHistory) {
-  if (!viewing) return;
+  if (!viewing || INVITE >= 0) return;
   viewing = false;
   if (shownIdx >= 0) { unfit(cards[shownIdx]); homeOf(cards[shownIdx]).prepend(cards[shownIdx].svg); }
   shownIdx = -1;
@@ -514,6 +525,7 @@ function closeViewer(fromHistory) {
   deck.scrollLeft = active * deck.clientWidth;
 }
 function step(d) {
+  if (INVITE >= 0) return;
   const i = Math.max(0, Math.min(cards.length - 1, active + d));
   if (i === active) return;
   deck.scrollLeft = i * deck.clientWidth; // keeps the carousel in sync
@@ -528,7 +540,7 @@ $('v-replay').addEventListener('click', replay);
 function toast(text) { const t = $('toast'); t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 const cardName = c => HauntCard.themeNames[c.theme];
 const fileBase = c => `halloween-invitation-${cardName(c).toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')}`;
-function cardLink(c) { const u = new URL(location.href); u.search = `?card=${c.theme}`; u.hash = ''; return u.toString(); }
+function cardLink(c) { return new URL(`invite/${c.theme}/`, new URL('./', location.href.split(/[?#]/)[0])).toString(); }
 function saveFile(href, name) { const a = Object.assign(document.createElement('a'), { href, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 // the current card's video is fetched ahead of time, so the share sheet opens straight away when tapped
 const videoCache = new Map();
@@ -547,7 +559,10 @@ $('act-link').addEventListener('click', async () => {
 });
 $('act-png').addEventListener('click', () => {
   const c = cards[active];
-  saveFile(`cards/${c.theme}.png`, `${fileBase(c)}.png`);
+  // phones get a tall 1290x2796 version that fills the whole screen; tablets/computers the 9:16 card
+  const portrait = Math.min(innerWidth, innerHeight) / Math.max(innerWidth, innerHeight);
+  const tall = matchMedia('(pointer: coarse)').matches && portrait < 0.52;
+  saveFile(`cards/${c.theme}${tall ? '-tall' : ''}.png`, `${fileBase(c)}.png`);
   toast('Saving the image…');
 });
 $('act-video').addEventListener('click', async () => {
@@ -648,7 +663,14 @@ $('gate-form').addEventListener('submit', async e => {
     input.value = ''; input.focus();
   }
 });
-setTimeout(() => $('gate-input').focus(), 300);
+if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
+  document.body.classList.remove('locked', 'splash');
+  entered = true;
+  $('act-rsvp').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
+  openViewer();
+  cards[INVITE].card.ready.then(replay);
+}, 0);
+else setTimeout(() => $('gate-input').focus(), 300);
 
 $('replay').addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
