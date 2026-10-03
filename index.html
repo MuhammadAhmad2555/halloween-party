@@ -410,7 +410,7 @@ const cards = HauntCard.THEMES.map((theme, i) => {
 function build(i) {
   const c = cards[i];
   if (c && !c.card) {
-    c.card = HauntCard.create(c.svg, { theme: c.theme, lite: true, party });
+    c.card = HauntCard.create(c.svg, { theme: c.theme, lite: true, party, rsvp: INVITE < 0 }); // shared links leave the RSVP off the card
     c.card.ready.then(() => { if (c.clock === null) c.card.setTime(c.at); });
   }
   return c;

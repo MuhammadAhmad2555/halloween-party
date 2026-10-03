@@ -130,7 +130,7 @@
   function create(svg, opts = {}) {
     const T = THEMES[opts.theme] || THEMES.manor;
     const theme = THEMES[opts.theme] ? opts.theme : 'manor';
-    const OPT = { text: opts.text !== false, grain: !!opts.grain, lite: !!opts.lite };
+    const OPT = { text: opts.text !== false, grain: !!opts.grain, lite: !!opts.lite, rsvp: opts.rsvp !== false };
     const P = Object.assign({}, DEFAULT_PARTY, opts.party || {});
     const MOON = T.moon;
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -1077,22 +1077,24 @@
     function reveal(node, at, dur = 0.7, rise = 22) { entries.push({ node, at, dur, rise }); }
     const CINZEL = "'Cinzel', serif", CORM = "'Cormorant Garamond', serif", GOTH = "'Grenze Gotisch', serif";
 
-    const pill = el('g');
+    const topText = el('g'), bottomText = el('g');
+    const pill = el('g', {}, bottomText);
+    if (!OPT.rsvp) pill.setAttribute('display', 'none');
     el('rect', { x: 230, y: 1676, width: 620, height: 124, rx: 62, fill: T.accent, 'fill-opacity': 0.08, stroke: T.accent, 'stroke-width': 2.4 }, pill);
     el('rect', { x: 242, y: 1688, width: 596, height: 100, rx: 50, fill: 'none', stroke: T.accent, 'stroke-width': 1, opacity: 0.5 }, pill);
     reveal(pill, 3.0);
-    const divider = el('g', { stroke: CREAM, 'stroke-width': 1.4 });
+    const divider = el('g', { stroke: CREAM, 'stroke-width': 1.4 }, bottomText);
     el('path', { d: 'M330,1408 L490,1408 M590,1408 L750,1408', opacity: 0.55 }, divider);
     el('path', { d: batPath(0.4), fill: CREAM, stroke: 'none', transform: 'translate(540,1408) scale(0.62)' }, divider);
     reveal(divider, 2.65);
 
     if (OPT.text) {
-      const eg = el('g');
+      const eg = el('g', {}, topText);
       line(P.eyebrow, 150, CINZEL, 30, { weight: 600, ls: 9, parent: eg, max: 640 });
       for (const sx of [-1, 1]) el('path', { d: batPath(0.6), fill: CREAM, transform: `translate(${CX + sx * 375},140) scale(0.36)` }, eg);
       reveal(eg, 1.9);
 
-      const tg = el('g');
+      const tg = el('g', {}, topText);
       const glow = el('g', { filter: url('titleGlow'), opacity: 0.75 }, tg);
       line(P.title1, 292, GOTH, 150, { fill: T.titleGlow, weight: 700, parent: glow, max: 920 });
       line(P.title2, 442, GOTH, 176, { fill: T.titleGlow, weight: 700, parent: glow, max: 920 });
@@ -1100,14 +1102,16 @@
       line(P.title2, 442, GOTH, 176, { fill: url('title'), weight: 700, parent: tg, max: 920 });
       reveal(tg, 2.1, 0.9, 30);
 
-      const dg = el('g');
+      const dg = el('g', {}, bottomText);
       reveal(line(P.date, 1290, CINZEL, 56, { weight: 700, ls: 5, parent: dg, max: 860 }), 2.4);
       reveal(line(P.time, 1356, CORM, 46, { italic: true, weight: 500, fill: T.soft, parent: dg, max: 860 }), 2.5);
       reveal(line(P.venue, 1480, CINZEL, 50, { weight: 700, ls: 8, parent: dg, max: 860 }), 2.75);
       reveal(line(P.address, 1536, CORM, 44, { italic: true, weight: 500, fill: T.soft, parent: dg, max: 860 }), 2.85);
       reveal(line(P.note, 1616, CORM, 40, { italic: true, weight: 600, fill: T.accent, parent: dg, max: 880 }), 2.95);
-      reveal(line(P.rsvpLabel, 1726, CINZEL, 25, { weight: 600, ls: 6, fill: T.accent, parent: dg, max: 540 }), 3.1);
-      reveal(line(P.rsvpNumber, 1776, CINZEL, 44, { weight: 700, ls: 4, parent: dg, max: 560 }), 3.15);
+      if (OPT.rsvp) {
+        reveal(line(P.rsvpLabel, 1726, CINZEL, 25, { weight: 600, ls: 6, fill: T.accent, parent: dg, max: 540 }), 3.1);
+        reveal(line(P.rsvpNumber, 1776, CINZEL, 44, { weight: 700, ls: 4, parent: dg, max: 560 }), 3.15);
+      }
     }
 
     /* ---------- finish ---------- */
@@ -1201,7 +1205,7 @@
     let ex = 0, ey = 0, eyT = 0;
     /* Fit to a screen of pw x ph pixels, keeping the card itself clear of overlays that cover
        `top` / `bottom` pixels; the scenery still runs underneath them. */
-    function setFit(pw, ph, top = 0, bottom = 0) {
+    function setFit(pw, ph, top = 0, bottom = 0, frame = false) {
       const ah = Math.max(1, ph - top - bottom);
       const sc = Math.min(pw / W, ah / H);
       const vw = pw / sc, vh = ph / sc;
@@ -1215,8 +1219,14 @@
       for (const r of fullRects) { r.setAttribute('x', f2(x0)); r.setAttribute('y', f2(y0)); r.setAttribute('width', f2(w)); r.setAttribute('height', f2(h)); }
       border.setAttribute('x', f2(26 - ex)); border.setAttribute('y', f2(26 - eyT));
       border.setAttribute('width', f2(w - 52)); border.setAttribute('height', f2(h - 52));
+      // the thin card frame only belongs on the plain 9:16 card, never when filling a screen
+      border.setAttribute('display', frame && !(ex > 1 || eyT > 1 || ey > 1) ? 'inline' : 'none');
+      // on taller screens the title rises into the extra sky and the details settle into the extra ground
+      const lift = Math.max(0, eyT) * 0.7, drop = Math.max(0, ey) * (OPT.rsvp ? 0.55 : 0.75) + (OPT.rsvp ? 0 : 60);
+      topText.setAttribute('transform', lift > 0.5 ? `translate(0,${f2(-lift)})` : '');
+      bottomText.setAttribute('transform', drop > 0.5 ? `translate(0,${f2(drop)})` : '');
     }
-    function setAspect(ratio) { if (ratio > W / H) setFit(H * ratio, H); else setFit(W, W / ratio); }
+    function setAspect(ratio) { if (ratio > W / H) setFit(H * ratio, H, 0, 0, true); else setFit(W, W / ratio, 0, 0, true); }
     svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     // where the moon sits on screen, as a fraction of the drawn area (for the page-level bat intro)
     function moonAt() { return { x: (MOON.x + ex) / (W + 2 * ex), y: (MOON.y + eyT) / (H + eyT + ey) }; }
