@@ -258,7 +258,18 @@
 </style>
 </head>
 <body class="splash locked">
-<script>if (/[?&]invite=/.test(location.search)) document.body.className = 'invite';</script>
+<script>
+(function () {
+  if (/[?&]invite=/.test(location.search)) { document.body.className = 'invite'; return; }
+  try {
+    // Customer opened studio from the dashboard — skip the shared password gate.
+    if (sessionStorage.getItem('hp_host_studio') === '1' || sessionStorage.getItem('hp_auth_email')) {
+      document.body.classList.remove('locked');
+      document.body.classList.add('host-studio');
+    }
+  } catch (e) {}
+})();
+</script>
 <canvas id="bg" aria-hidden="true"></canvas>
 <svg class="web l" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
 <svg class="web r" viewBox="0 0 240 240" fill="none" stroke="#F1E6D0" stroke-width="1.2" aria-hidden="true"><path d="M0,0 L240,0 M0,0 L231,62 M0,0 L208,120 M0,0 L170,170 M0,0 L120,208 M0,0 L62,231 M0,0 L0,240"/><path d="M40,0 Q33,9 35,9 Q30,15 35,20 Q25,23 28,28 Q18,30 20,35 Q9,33 9,35 Q0,40 0,40 M85,0 Q71,19 74,20 Q63,33 60,60 Q46,51 43,74 Q20,71 19,74 Q0,85 0,85 M135,0 Q112,30 117,31 Q98,51 95,95 Q73,80 68,117 Q31,112 30,117 Q0,135 0,135 M190,0 Q158,42 165,44 Q138,72 134,134 Q103,113 96,165 Q44,158 42,165 Q0,190 0,190"/></svg>
@@ -386,11 +397,17 @@
 <script src="art.js"></script>
 <script src="bg.js"></script>
 <script src="intro.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="js/customer-data.js"></script>
 <script>
 /* =====================================================================
    PARTY DETAILS: EDIT EVERYTHING HERE
    (Also update the <meta property="og:..."> tags at the top of this
    file, because link previews can't read this script.)
+   Phone, venue, and maps below are defaults only. When a customer
+   public id is present (?c=…), Firebase publicInvites overrides them.
    ===================================================================== */
 const PARTY = {
   title:      'The Halloween Party',
@@ -420,6 +437,31 @@ const PARTY = {
 };
 /* ===================================================================== */
 
+window.__HP_PUBLIC_ID__ = '';
+
+(async function bootHalloween() {
+  const params = new URLSearchParams(location.search);
+  let publicId = (params.get('c') || '').trim();
+  // Host studio: reuse the public id remembered after dashboard login.
+  // Guest invite links always carry ?c= themselves; do not invent one.
+  if (!publicId && !params.get('invite')) {
+    try { publicId = (sessionStorage.getItem('hp_publicId') || '').trim(); } catch (e) {}
+  }
+  window.__HP_PUBLIC_ID__ = publicId;
+  const cfg = window.FIREBASE_CONFIG;
+  const configured = cfg && cfg.apiKey && !String(cfg.apiKey).startsWith('YOUR_');
+  if (publicId && configured && window.HalloweenCustomer) {
+    try {
+      HalloweenCustomer.ensureApp();
+      await HalloweenCustomer.applyPublicInvite(PARTY, publicId);
+    } catch (e) {
+      console.warn('Halloween customer data could not be loaded.', e);
+    }
+  }
+  startHalloweenApp();
+})();
+
+function startHalloweenApp() {
 const $ = id => document.getElementById(id);
 
 /* ---------- the animated cards ---------- */
@@ -602,7 +644,11 @@ $('v-replay').addEventListener('click', replay);
 function toast(text) { const t = $('toast'); t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 const cardName = c => HauntCard.themeNames[c.theme];
 const fileBase = c => `halloween-invitation-${cardName(c).toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')}`;
-function cardLink(c) { return new URL(`invite/${c.theme}/`, new URL('./', location.href.split(/[?#]/)[0])).toString(); }
+function cardLink(c) {
+  const u = new URL(`invite/${c.theme}/`, new URL('./', location.href.split(/[?#]/)[0]));
+  if (window.__HP_PUBLIC_ID__) u.searchParams.set('c', window.__HP_PUBLIC_ID__);
+  return u.toString();
+}
 function saveFile(href, name) { const a = Object.assign(document.createElement('a'), { href, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 // the current card's video is fetched ahead of time, so the share sheet opens straight away when tapped
 const videoCache = new Map();
@@ -745,6 +791,11 @@ if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
   openViewer();
   cards[INVITE].card.ready.then(replay);
 }, 0);
+else if (document.body.classList.contains('host-studio') || (window.HalloweenCustomer && HalloweenCustomer.isHostStudioUnlock())) {
+  // Came from the customer dashboard — no password, same moon intro as after the gate
+  document.body.classList.remove('locked');
+  setTimeout(() => PageIntro.splash(5, enter), 0);
+}
 else setTimeout(() => $('gate-input').focus(), 300);
 
 $('replay').addEventListener('click', () => {
@@ -765,7 +816,8 @@ $('title').textContent = PARTY.title;
 $('d-date').textContent = PARTY.dateText.toUpperCase();
 $('d-time').textContent = PARTY.timeText;
 $('d-venue').textContent = PARTY.venue.toUpperCase();
-$('d-address').textContent = PARTY.address;
+$('d-address').textContent = PARTY.address || '';
+$('d-address').style.display = PARTY.address ? '' : 'none';
 $('d-note').textContent = PARTY.note;
 $('rsvp-by').textContent = PARTY.rsvpBy ? `${PARTY.rsvpBy}. Your reply goes to ${PARTY.hostName} on WhatsApp${PARTY.phoneShown ? ' (' + PARTY.phoneShown + ')' : ''}.` : '';
 
@@ -775,7 +827,9 @@ $('btn-yes').href = wa(`Hello! 🦇 I have received my summons and I WILL attend
 $('btn-no').href = wa(`Hello, sadly I cannot make it to ${PARTY.title} on ${PARTY.dateText}. Have a wonderfully spooky night! 🎃`);
 
 /* ---------- directions ---------- */
-$('btn-map').href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PARTY.mapsQuery)}`;
+$('btn-map').href = window.HalloweenCustomer
+  ? HalloweenCustomer.mapsHref(PARTY.mapsQuery)
+  : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PARTY.mapsQuery)}`;
 
 /* ---------- countdown (start time is the guest's local time) ---------- */
 const startAt = new Date(PARTY.start), endAt = new Date(PARTY.end);
@@ -824,13 +878,16 @@ $('btn-cal').addEventListener('click', addToCalendar);
 
 /* ---------- share ---------- */
 $('btn-share').addEventListener('click', async () => {
-  const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url: location.href.split('#')[0] };
+  const shareUrl = new URL(location.href.split('#')[0]);
+  if (window.__HP_PUBLIC_ID__) shareUrl.searchParams.set('c', window.__HP_PUBLIC_ID__);
+  const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url: shareUrl.toString() };
   try {
     if (navigator.share) { await navigator.share(data); return; }
     await navigator.clipboard.writeText(data.url);
     $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800);
   } catch (e) { /* share sheet dismissed */ }
 });
+} // end startHalloweenApp
 </script>
 </body>
 </html>

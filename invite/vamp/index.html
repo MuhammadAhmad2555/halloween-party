@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Halloween Party · The Vampire’s Castle</title>
+<title>The Halloween Party · The Vampire's Castle</title>
 <meta name="description" content="You are summoned. Saturday 31 October, eight o'clock, Hollow House. Tap to open your invitation.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="You are summoned to The Halloween Party">
-<meta property="og:description" content="The Vampire’s Castle · Saturday 31 October · eight o'clock in the evening. Tap to open your invitation.">
+<meta property="og:description" content="The Vampire's Castle · Saturday 31 October · eight o'clock in the evening. Tap to open your invitation.">
 <meta property="og:url" content="https://novexahub.live/halloween/invite/vamp/">
 <meta property="og:image" content="https://novexahub.live/halloween/cards/vamp-og.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -17,7 +17,13 @@
 <meta name="theme-color" content="#0A0717">
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
 <style>html,body{margin:0;background:#0A0717;color:#F1E6D0;font:italic 20px Georgia,serif;height:100%;display:grid;place-items:center}a{color:#E8834A}</style>
-<script>location.replace('../../?invite=vamp');</script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search);
+  q.set('invite', 'vamp');
+  location.replace('../../?' + q.toString());
+})();
+</script>
 </head>
 <body><noscript><a href="../../?invite=vamp">Open your invitation</a></noscript></body>
 </html>

@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Email-only access: no Firebase Auth passwords.
+    // Doc IDs for authorizedEmails and customers are the lowercased email.
+
+    function isEmailAuthorized(email) {
+      return exists(/databases/$(database)/documents/authorizedEmails/$(email))
+        && get(/databases/$(database)/documents/authorizedEmails/$(email)).data.active == true;
+    }
+
+    function validPhoneShown(v) {
+      return v is string && v.size() >= 7 && v.size() <= 32
+        && v.matches('^[+0-9() .\\-]+$');
+    }
+
+    function validWhatsapp(v) {
+      return v is string && v.size() >= 8 && v.size() <= 16
+        && v.matches('^[1-9][0-9]+$');
+    }
+
+    function validLocationName(v) {
+      return v is string && v.size() >= 2 && v.size() <= 80;
+    }
+
+    function validMapsLocation(v) {
+      return v is string && v.size() >= 3 && v.size() <= 500;
+    }
+
+    function validTimeText(v) {
+      return v is string && v.size() >= 3 && v.size() <= 80;
+    }
+
+    function validPublicId(v) {
+      return v is string && v.size() >= 8 && v.size() <= 32
+        && v.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    function customerFieldsOk(emailKey, data) {
+      return data.keys().hasOnly([
+          'email', 'publicId', 'phoneShown', 'whatsapp',
+          'locationName', 'mapsLocation', 'timeText', 'updatedAt'
+        ])
+        && data.email == emailKey
+        && validPublicId(data.publicId)
+        && validPhoneShown(data.phoneShown)
+        && validWhatsapp(data.whatsapp)
+        && validLocationName(data.locationName)
+        && validMapsLocation(data.mapsLocation)
+        && validTimeText(data.timeText)
+        && data.updatedAt is timestamp;
+    }
+
+    function publicInviteFieldsOk(data) {
+      return data.keys().hasOnly([
+          'ownerEmail', 'phoneShown', 'whatsapp',
+          'locationName', 'mapsLocation', 'timeText', 'updatedAt'
+        ])
+        && data.ownerEmail is string
+        && isEmailAuthorized(data.ownerEmail)
+        && validPhoneShown(data.phoneShown)
+        && validWhatsapp(data.whatsapp)
+        && validLocationName(data.locationName)
+        && validMapsLocation(data.mapsLocation)
+        && validTimeText(data.timeText)
+        && data.updatedAt is timestamp;
+    }
+
+    // Admin-managed allowlist. Create docs in Firebase Console only.
+    // Doc ID = lowercased email. Fields: { email, active: true }
+    match /authorizedEmails/{email} {
+      allow get: if true;   // login checks one email by ID
+      allow list: if false; // cannot dump the full allowlist
+      allow write: if false;
+    }
+
+    // Per-customer record. Doc ID = lowercased authorized email.
+    match /customers/{emailKey} {
+      allow get: if isEmailAuthorized(emailKey);
+      allow list: if false;
+
+      allow create: if isEmailAuthorized(emailKey)
+        && customerFieldsOk(emailKey, request.resource.data);
+
+      allow update: if isEmailAuthorized(emailKey)
+        && customerFieldsOk(emailKey, request.resource.data)
+        && request.resource.data.publicId == resource.data.publicId
+        && request.resource.data.email == resource.data.email;
+
+      allow delete: if false;
+    }
+
+    // Public invite payload for guests (?c=publicId).
+    match /publicInvites/{publicId} {
+      allow read: if true;
+
+      allow create: if publicInviteFieldsOk(request.resource.data)
+        && exists(/databases/$(database)/documents/customers/$(request.resource.data.ownerEmail))
+        && get(/databases/$(database)/documents/customers/$(request.resource.data.ownerEmail)).data.publicId == publicId;
+
+      allow update: if publicInviteFieldsOk(request.resource.data)
+        && resource.data.ownerEmail == request.resource.data.ownerEmail
+        && exists(/databases/$(database)/documents/customers/$(request.resource.data.ownerEmail))
+        && get(/databases/$(database)/documents/customers/$(request.resource.data.ownerEmail)).data.publicId == publicId;
+
+      allow delete: if false;
+    }
+  }
+}
