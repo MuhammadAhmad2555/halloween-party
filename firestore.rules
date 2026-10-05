@@ -20,16 +20,22 @@ service cloud.firestore {
         && v.matches('^[1-9][0-9]+$');
     }
 
-    function validLocationName(v) {
-      return v is string && v.size() >= 2 && v.size() <= 80;
+    // optional card text edited in the studio: a few short strings
+    function validCardTextField(m, k) {
+      return !(k in m) || (m[k] is string && m[k].size() <= 80);
     }
 
-    function validMapsLocation(v) {
-      return v is string && v.size() >= 3 && v.size() <= 500;
-    }
-
-    function validTimeText(v) {
-      return v is string && v.size() >= 3 && v.size() <= 80;
+    function validCardText(data) {
+      return !('cardText' in data) || (data.cardText is map
+        && data.cardText.keys().hasOnly(['eyebrow', 'title1', 'title2', 'date', 'time', 'venue', 'address', 'note'])
+        && validCardTextField(data.cardText, 'eyebrow')
+        && validCardTextField(data.cardText, 'title1')
+        && validCardTextField(data.cardText, 'title2')
+        && validCardTextField(data.cardText, 'date')
+        && validCardTextField(data.cardText, 'time')
+        && validCardTextField(data.cardText, 'venue')
+        && validCardTextField(data.cardText, 'address')
+        && validCardTextField(data.cardText, 'note'));
     }
 
     function validPublicId(v) {
@@ -39,31 +45,25 @@ service cloud.firestore {
 
     function customerFieldsOk(emailKey, data) {
       return data.keys().hasOnly([
-          'email', 'publicId', 'phoneShown', 'whatsapp',
-          'locationName', 'mapsLocation', 'timeText', 'updatedAt'
+          'email', 'publicId', 'phoneShown', 'whatsapp', 'cardText', 'updatedAt'
         ])
         && data.email == emailKey
         && validPublicId(data.publicId)
         && validPhoneShown(data.phoneShown)
         && validWhatsapp(data.whatsapp)
-        && validLocationName(data.locationName)
-        && validMapsLocation(data.mapsLocation)
-        && validTimeText(data.timeText)
+        && validCardText(data)
         && data.updatedAt is timestamp;
     }
 
     function publicInviteFieldsOk(data) {
       return data.keys().hasOnly([
-          'ownerEmail', 'phoneShown', 'whatsapp',
-          'locationName', 'mapsLocation', 'timeText', 'updatedAt'
+          'ownerEmail', 'phoneShown', 'whatsapp', 'cardText', 'updatedAt'
         ])
         && data.ownerEmail is string
         && isEmailAuthorized(data.ownerEmail)
         && validPhoneShown(data.phoneShown)
         && validWhatsapp(data.whatsapp)
-        && validLocationName(data.locationName)
-        && validMapsLocation(data.mapsLocation)
-        && validTimeText(data.timeText)
+        && validCardText(data)
         && data.updatedAt is timestamp;
     }
 

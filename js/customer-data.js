@@ -44,30 +44,22 @@
     return '';
   }
 
-  function validateLocationName(name) {
-    const v = String(name || '').trim();
-    if (v.length < 2 || v.length > 80) return 'Location name must be between 2 and 80 characters.';
-    return '';
+  function validateCustomerFields({ phoneShown }) {
+    return validatePhone(phoneShown) || '';
   }
 
-  function validateMapsLocation(maps) {
-    const v = String(maps || '').trim();
-    if (v.length < 3 || v.length > 500) return 'Maps location must be between 3 and 500 characters.';
-    return '';
-  }
+  // The words on the invitation cards, as edited by the host in the studio.
+  const CARD_TEXT_KEYS = ['eyebrow', 'title1', 'title2', 'date', 'time', 'venue', 'address', 'note'];
+  const CARD_TEXT_MAX = 80;
 
-  function validateTimeText(timeText) {
-    const v = String(timeText || '').trim();
-    if (v.length < 3 || v.length > 80) return 'Party time must be between 3 and 80 characters.';
-    return '';
-  }
-
-  function validateCustomerFields({ phoneShown, locationName, mapsLocation, timeText }) {
-    return validatePhone(phoneShown)
-      || validateLocationName(locationName)
-      || validateMapsLocation(mapsLocation)
-      || validateTimeText(timeText)
-      || '';
+  function cleanCardText(text) {
+    const out = {};
+    if (!text || typeof text !== 'object') return out;
+    for (const k of CARD_TEXT_KEYS) {
+      if (typeof text[k] !== 'string') continue;
+      out[k] = text[k].replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, CARD_TEXT_MAX);
+    }
+    return out;
   }
 
   function isMapsUrl(value) {
@@ -86,28 +78,13 @@
     return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(v);
   }
 
-  function addressFromMaps(mapsLocation) {
-    const v = String(mapsLocation || '').trim();
-    if (!v || isMapsUrl(v)) return '';
-    return v;
-  }
-
   function applyInviteData(PARTY, data) {
     if (!PARTY || !data) return PARTY;
     if (data.phoneShown) {
       PARTY.phoneShown = data.phoneShown;
       PARTY.whatsapp = data.whatsapp || toWhatsappDigits(data.phoneShown);
     }
-    if (data.locationName) PARTY.venue = data.locationName;
-    if (data.timeText) PARTY.timeText = data.timeText;
-    if (data.mapsLocation) {
-      PARTY.mapsQuery = data.mapsLocation;
-      // Replace the site default address ("13 Raven Lane") with the customer's
-      // maps text, or clear it when they pasted a Maps URL.
-      PARTY.address = addressFromMaps(data.mapsLocation);
-    } else if (data.locationName) {
-      PARTY.address = '';
-    }
+    if (data.cardText) PARTY.cardText = cleanCardText(data.cardText);
     return PARTY;
   }
 
@@ -207,11 +184,10 @@
     const publicId = existing.exists && existing.data().publicId
       ? existing.data().publicId
       : newPublicId();
+    // keep any card text the host already edited in the studio
+    const cardText = existing.exists && existing.data().cardText ? cleanCardText(existing.data().cardText) : null;
 
     const phoneShown = String(fields.phoneShown).trim();
-    const locationName = String(fields.locationName).trim();
-    const mapsLocation = String(fields.mapsLocation).trim();
-    const timeText = String(fields.timeText).trim();
     const whatsapp = toWhatsappDigits(phoneShown);
     const updatedAt = firebase.firestore.FieldValue.serverTimestamp();
 
@@ -220,9 +196,6 @@
       publicId,
       phoneShown,
       whatsapp,
-      locationName,
-      mapsLocation,
-      timeText,
       updatedAt,
     };
 
@@ -230,17 +203,38 @@
       ownerEmail: key,
       phoneShown,
       whatsapp,
-      locationName,
-      mapsLocation,
-      timeText,
       updatedAt,
     };
+    if (cardText) { customerDoc.cardText = cardText; publicDoc.cardText = cardText; }
 
     await ref.set(customerDoc, { merge: false });
     await db.collection('publicInvites').doc(publicId).set(publicDoc, { merge: false });
 
     try { sessionStorage.setItem(PUBLIC_ID_KEY, publicId); } catch (e) {}
     return customerDoc;
+  }
+
+  /** Save the edited card text so guests opening the host's links see it too. */
+  async function saveCardText(email, text) {
+    const key = normalizeEmail(email);
+    if (!(await isEmailAuthorized(key))) throw new Error('This email is not authorized.');
+    const { db } = ensureApp();
+    const ref = db.collection('customers').doc(key);
+    const snap = await ref.get();
+    const cur = snap.exists ? snap.data() : null;
+    if (!cur || !cur.publicId || !cur.phoneShown) throw new Error('Save your phone number in the dashboard first.');
+
+    const cardText = cleanCardText(text);
+    const updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    const whatsapp = toWhatsappDigits(cur.phoneShown);
+    // whole documents, so fields from older versions of the dashboard are dropped
+    await ref.set({
+      email: key, publicId: cur.publicId, phoneShown: cur.phoneShown, whatsapp, cardText, updatedAt,
+    }, { merge: false });
+    await db.collection('publicInvites').doc(cur.publicId).set({
+      ownerEmail: key, phoneShown: cur.phoneShown, whatsapp, cardText, updatedAt,
+    }, { merge: false });
+    return cardText;
   }
 
   function studioUrl(publicId) {
@@ -263,13 +257,12 @@
     newPublicId,
     toWhatsappDigits,
     validatePhone,
-    validateLocationName,
-    validateMapsLocation,
-    validateTimeText,
     validateCustomerFields,
+    CARD_TEXT_KEYS,
+    cleanCardText,
+    saveCardText,
     isMapsUrl,
     mapsHref,
-    addressFromMaps,
     applyInviteData,
     fetchPublicInvite,
     applyPublicInvite,

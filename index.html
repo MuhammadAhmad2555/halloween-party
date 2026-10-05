@@ -60,12 +60,8 @@
   .dots { display: flex; gap: 10px; }
   .dot { width: 9px; height: 9px; padding: 0; border-radius: 50%; border: 0; background: rgba(241, 230, 208, .3); cursor: pointer; transition: .25s; }
   .dot[aria-current="true"] { background: var(--cream); transform: scale(1.25); box-shadow: 0 0 10px rgba(241, 230, 208, .6); }
-  .deck-name { margin: 6px 0 0; font-size: 18px; color: var(--soft); min-height: 1.45em; }
   .card svg.art { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
   .card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .hero-bar { display: flex; justify-content: space-between; align-items: center; height: 44px; padding: 0 4px; }
-  .link-btn { background: none; border: 0; color: var(--soft); font: italic 500 18px 'Cormorant Garamond', serif; padding: 8px 4px; cursor: pointer; opacity: .85; text-decoration: none; }
-  .link-btn:active { opacity: .6; }
 
   /* the page title takes the active card's typeface and glow */
   h1 { margin: 26px 0 0; font: var(--title-weight, 700) clamp(44px, 13vw, 60px)/1 var(--title-font, 'Grenze Gotisch'), serif; color: #FFF0D6;
@@ -78,17 +74,6 @@
   .countdown span { display: block; margin-top: 8px; font: 600 11px 'Cinzel', serif; letter-spacing: 3px; opacity: .75; }
   .cd-note { margin: 10px 0 0; font-size: 18px; color: var(--soft); min-height: 1.4em; }
 
-  .divider { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 30px 0; }
-  .divider i { width: 80px; height: 1px; background: var(--line); }
-  .divider svg { width: 34px; height: 20px; fill: var(--cream); opacity: .9; }
-
-  .details p { margin: 0 0 4px; }
-  .details .date { font: 700 22px 'Cinzel', serif; letter-spacing: 3px; }
-  .details .venue { font: 700 18px 'Cinzel', serif; letter-spacing: 4px; margin-top: 16px; }
-  .details .soft { color: var(--soft); }
-  .details .note { color: var(--ember); margin-top: 14px; font-weight: 600; }
-
-  .actions { display: grid; gap: 12px; }
   .btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 12px 18px; border-radius: 999px;
     font: 700 15px 'Cinzel', serif; letter-spacing: 2.5px; text-decoration: none; cursor: pointer; color: var(--cream);
     border: 1.5px solid rgba(241, 230, 208, .4); background: rgba(10, 7, 23, .6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); -webkit-tap-highlight-color: transparent; transition: transform .1s, background .2s; }
@@ -96,9 +81,6 @@
   .btn.primary { background: linear-gradient(180deg, #F29A5E, #D9692F); border-color: transparent; color: #1A0B06; box-shadow: 0 6px 24px rgba(232, 131, 74, .35); }
   .btn.ghost:hover { background: rgba(30, 20, 46, .75); }
   .btn svg { width: 18px; height: 18px; flex: none; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .two .btn { font-size: 12.5px; letter-spacing: 1.2px; padding: 12px 8px; gap: 7px; }
-  .rsvp-by { margin: 16px 0 0; font-size: 17px; color: var(--soft); }
   footer { margin-top: 40px; font: 600 11px 'Cinzel', serif; letter-spacing: 4px; opacity: .45; }
   .toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom)); transform: translate(-50%, 40px); opacity: 0; transition: .3s;
     background: #F1E6D0; color: #1A0B06; padding: 10px 18px; border-radius: 999px; font: 600 13px 'Cinzel', serif; letter-spacing: 1px; pointer-events: none; }
@@ -106,7 +88,7 @@
   @media (min-width: 700px) { main { padding-top: 32px; } }
 
   /* very small phones: stack the two half-width buttons */
-  @media (max-width: 340px) { .two { grid-template-columns: 1fr; } .countdown strong { font-size: 30px; } }
+  @media (max-width: 340px) { .countdown strong { font-size: 30px; } }
   /* tablets in portrait: a bigger card and a wider column */
   @media (min-width: 600px) { main { max-width: 600px; } .hero { width: min(100%, max(320px, calc((100svh - 140px) * 9 / 16))); } }
   /* tablets in landscape, laptops, desktops: card on the left, details on the right */
@@ -114,9 +96,11 @@
     main { max-width: 1120px; display: grid; grid-template-columns: auto minmax(340px, 460px); column-gap: clamp(32px, 5vw, 80px);
       justify-content: center; align-items: start; }
     main > * { grid-column: 2; }
-    main > .hero { grid-column: 1; grid-row: 1 / span 12; position: sticky; top: 20px; width: min(520px, calc((100vh - 150px) * 9 / 16)); }
+    main > .hero { grid-column: 1; grid-row: 1; position: sticky; top: 20px; width: min(520px, calc((100vh - 150px) * 9 / 16)); }
     @supports (height: 100svh) { main > .hero { width: min(520px, calc((100svh - 150px) * 9 / 16)); } }
-    main > h1 { margin-top: 40px; }
+    /* title, countdown and footer sit centred beside the card */
+    main > .info { grid-row: 1; align-self: center; }
+    main > .info > h1 { margin-top: 0; }
   }
 
   /* ---------- full-screen card ---------- */
@@ -146,24 +130,62 @@
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
   /* share / download / video */
   .v-actions { position: absolute; z-index: 3; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%);
-    display: flex; gap: 8px; padding: 8px; border-radius: 999px; background: rgba(5, 3, 10, .62); border: 1px solid rgba(241, 230, 208, .18);
-    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); max-width: calc(100% - 24px); }
-  .v-act { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 84px; height: 58px; padding: 0 10px;
-    border: 0; border-radius: 999px; background: transparent; color: var(--cream); cursor: pointer; font: 700 10.5px 'Cinzel', serif; letter-spacing: 1.2px;
-    -webkit-tap-highlight-color: transparent; white-space: nowrap; text-decoration: none; }
-  .v-act svg { width: 22px; height: 22px; }
-  .v-act:hover, .v-act:focus-visible { background: rgba(241, 230, 208, .1); }
+    display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; padding: 6px; border-radius: 24px;
+    background: linear-gradient(180deg, rgba(28, 20, 44, .78), rgba(8, 5, 16, .82)); border: 1px solid rgba(241, 230, 208, .16);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 240, 214, .08);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); max-width: calc(100% - 24px); }
+  .v-act { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 92px; height: 64px; padding: 0 12px;
+    border: 0; border-radius: 18px; background: transparent; color: var(--cream); cursor: pointer; font: 700 10.5px 'Cinzel', serif; letter-spacing: 1.4px;
+    -webkit-tap-highlight-color: transparent; white-space: nowrap; text-decoration: none; transition: background .2s, transform .1s, box-shadow .2s; }
+  .v-act svg { width: 22px; height: 22px; color: var(--fab-accent, var(--ember)); transition: transform .2s; }
+  .v-act:hover, .v-act:focus-visible { background: rgba(241, 230, 208, .09); }
+  .v-act:hover svg { transform: translateY(-1px); }
+  .v-act:focus-visible { outline: 2px solid rgba(241, 230, 208, .55); outline-offset: 2px; }
   .v-act:active { transform: scale(.96); }
-  .v-act.primary { background: linear-gradient(180deg, #F29A5E, #D9692F); color: #1A0B06; }
+  .v-act.primary { background: var(--fab-bg, linear-gradient(180deg, #F29A5E, #D9692F)); color: #1A0B06;
+    box-shadow: 0 6px 20px var(--fab-glow, rgba(232, 131, 74, .45)), inset 0 1px 0 rgba(255, 245, 225, .35); }
+  .v-act.primary svg { color: currentColor; }
+  .v-act.primary:hover, .v-act.primary:focus-visible { background: var(--fab-bg, linear-gradient(180deg, #F29A5E, #D9692F)); filter: brightness(1.06); }
   .v-act[aria-busy="true"] { opacity: .6; pointer-events: none; }
-  @media (max-width: 340px) { .v-act { min-width: 72px; padding: 0 6px; font-size: 9.5px; } }
+  @media (max-width: 420px) {
+    .v-actions { width: calc(100% - 20px); gap: 4px; padding: 5px; }
+    .v-act { min-width: 0; padding: 0 4px; font-size: 9.5px; letter-spacing: .8px; }
+  }
+  /* edit the card text: a sheet over the card */
+  .ed-wrap { position: absolute; inset: 0; z-index: 6; display: none; align-items: flex-end; justify-content: center;
+    background: rgba(3, 2, 7, .55); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+  .ed-wrap.open { display: flex; animation: vin .25s ease; }
+  .editor { width: min(560px, 100%); max-height: 88%; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); border-radius: 26px 26px 0 0; text-align: left;
+    background: linear-gradient(180deg, rgba(30, 20, 48, .97), rgba(10, 7, 20, .98)); border: 1px solid rgba(241, 230, 208, .16); border-bottom: 0;
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, .5); color: var(--cream); }
+  .editor h2 { margin: 0; text-align: center; font: var(--title-weight, 700) 30px/1.1 var(--title-font, 'Grenze Gotisch'), serif; color: #FFF0D6; }
+  .ed-sub { margin: 6px 0 16px; text-align: center; font-size: 16px; color: var(--soft); }
+  .ed-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; }
+  .ed-field { display: block; min-width: 0; }
+  .ed-eyebrow, .ed-date, .ed-time, .ed-note { grid-column: 1 / -1; }
+  .ed-field span { display: block; margin: 0 0 6px 4px; font: 600 10px 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; opacity: .8; }
+  .ed-field input { width: 100%; border-radius: 12px; border: 1.5px solid rgba(241, 230, 208, .28); background: rgba(5, 3, 10, .6); color: var(--cream);
+    font: italic 500 18px 'Cormorant Garamond', Georgia, serif; padding: 11px 13px; outline: none; -webkit-appearance: none; appearance: none; }
+  .ed-field input:focus { border-color: var(--fab-accent, var(--ember)); box-shadow: 0 0 0 3px rgba(232, 131, 74, .18); }
+  .ed-msg { min-height: 1.3em; margin: 12px 0 0; text-align: center; font-size: 15px; color: var(--soft); }
+  .ed-btns { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; margin-top: 10px; }
+  .ed-btn { min-height: 50px; border-radius: 999px; border: 1.5px solid rgba(241, 230, 208, .3); background: rgba(5, 3, 10, .5); color: var(--cream);
+    font: 700 12px 'Cinzel', serif; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .ed-btn:active { transform: scale(.97); }
+  .ed-btn:disabled { opacity: .55; cursor: default; }
+  .ed-btn.primary { border-color: transparent; color: #1A0B06; background: var(--fab-bg, linear-gradient(180deg, #F29A5E, #D9692F));
+    box-shadow: 0 6px 20px var(--fab-glow, rgba(232, 131, 74, .4)); }
+  @media (max-width: 380px) { .ed-fields { grid-template-columns: 1fr; } }
+  @media (min-width: 700px) { .ed-wrap { align-items: center; } .editor { border-radius: 26px; border-bottom: 1px solid rgba(241, 230, 208, .16); padding-bottom: 20px; } }
   body.viewing { overflow: hidden; }
   /* card-only page opened from a shared link: no password, no dashboard */
   body.invite main, body.invite .graveyard, body.invite .gate { display: none !important; }
   body.invite .vbtn, body.invite .v-label, body.invite .v-actions { display: none !important; }
   #act-rsvp { display: none; }
   body.invite #act-rsvp { display: flex; }
-  body.invite #act-video { background: transparent; color: var(--cream); }
+  body.invite #act-video { background: transparent; color: var(--cream); box-shadow: none; }
+  body.invite #act-video svg { color: var(--fab-accent, var(--ember)); }
 
   /* ---------- floating RSVP button on shared card links ---------- */
   .fab-wrap { display: none; }
@@ -303,9 +325,23 @@
   <p class="v-label" id="v-label"></p>
   <div class="v-actions" role="group" aria-label="Share this card">
     <a class="v-act primary" id="act-rsvp" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 0 1-11.8 7L4 20l1.1-4A8 8 0 1 1 20 12z"/><path d="M9 10.5c.5 2 2.5 4 4.5 4.5l1.2-1.2 1.8.8"/></svg>RSVP</a>
+    <button class="v-act" id="act-edit" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>EDIT TEXT</button>
     <button class="v-act" id="act-link" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 14a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.2 1.2M14 10a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg>SHARE LINK</button>
     <button class="v-act" id="act-png" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>SAVE PNG</button>
     <button class="v-act primary" id="act-video" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>SEND VIDEO</button>
+  </div>
+  <div class="ed-wrap" id="ed-wrap">
+    <form class="editor" id="editor" aria-labelledby="ed-title" autocomplete="off">
+      <h2 id="ed-title">Edit card text</h2>
+      <p class="ed-sub">Shows on all 8 cards, and in the PNG and video you send.</p>
+      <div class="ed-fields" id="ed-fields"></div>
+      <p class="ed-msg" id="ed-msg" role="status" aria-live="polite"></p>
+      <div class="ed-btns">
+        <button class="ed-btn" id="ed-reset" type="button">Reset</button>
+        <button class="ed-btn" id="ed-cancel" type="button">Cancel</button>
+        <button class="ed-btn primary" id="ed-save" type="submit">Save</button>
+      </div>
+    </form>
   </div>
 </div>
 <div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
@@ -333,50 +369,21 @@
       <div class="dots" id="dots"></div>
       <button class="nav-btn" id="next" type="button" aria-label="Next card">›</button>
     </div>
-    <p class="deck-name" id="deck-name"></p>
-    <div class="hero-bar">
-      <button class="link-btn" id="replay" type="button">↻ replay the bats</button>
-      <a class="link-btn" href="#details">details &amp; RSVP ↓</a>
-    </div>
   </div>
 
-  <h1 id="title"></h1>
-  <p class="eyebrow">you are summoned</p>
+  <div class="info">
+    <h1 id="title"></h1>
+    <p class="eyebrow">you are summoned</p>
 
-  <div class="countdown" role="timer" aria-live="off">
-    <div><strong id="cd-d">--</strong><span>DAYS</span></div>
-    <div><strong id="cd-h">--</strong><span>HOURS</span></div>
-    <div><strong id="cd-m">--</strong><span>MINUTES</span></div>
-  </div>
-  <p class="cd-note" id="cd-note"></p>
-
-  <div class="divider"><i></i><svg viewBox="-55 -45 110 65"><path class="bat-icon"/></svg><i></i></div>
-
-  <section class="details" id="details">
-    <p class="date" id="d-date"></p>
-    <p class="soft" id="d-time"></p>
-    <p class="venue" id="d-venue"></p>
-    <p class="soft" id="d-address"></p>
-    <p class="note" id="d-note"></p>
-  </section>
-
-  <div class="divider"><i></i><svg viewBox="-55 -45 110 65"><path class="bat-icon"/></svg><i></i></div>
-
-  <section class="actions">
-    <a class="btn primary" id="btn-yes" target="_blank" rel="noopener">I will attend</a>
-    <a class="btn ghost" id="btn-no" target="_blank" rel="noopener">I cannot make it</a>
-    <div class="two">
-      <button class="btn ghost" id="btn-cal" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Add to calendar</button>
-      <a class="btn ghost" id="btn-map" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Directions</a>
+    <div class="countdown" role="timer" aria-live="off">
+      <div><strong id="cd-d">--</strong><span>DAYS</span></div>
+      <div><strong id="cd-h">--</strong><span>HOURS</span></div>
+      <div><strong id="cd-m">--</strong><span>MINUTES</span></div>
     </div>
-    <button class="btn ghost" id="btn-share" type="button">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Share invitation</button>
-    <p class="rsvp-by" id="rsvp-by"></p>
-  </section>
+    <p class="cd-note" id="cd-note"></p>
 
-  <footer>HOLLOW HOUSE · XXXI · X</footer>
+    <footer>HOLLOW HOUSE · XXXI · X</footer>
+  </div>
 </main>
 <div class="fab-wrap" id="fab-wrap">
   <div class="fab-scrim" id="fab-scrim"></div>
@@ -401,6 +408,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script src="js/customer-data.js"></script>
+<script src="js/card-export.js"></script>
 <script>
 /* =====================================================================
    PARTY DETAILS: EDIT EVERYTHING HERE
@@ -467,12 +475,36 @@ const $ = id => document.getElementById(id);
 /* ---------- the animated cards ---------- */
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const titleLines = PARTY.title.match(/^(.*\S)\s+(\S+)$/) || [null, PARTY.title, ''];
-const party = {
+// what the cards say until the host edits them (the ready-made files in cards/ match this)
+const DEFAULT_TEXT = {
+  eyebrow: 'YOU ARE SUMMONED TO',
   title1: titleLines[1], title2: titleLines[2],
   date: PARTY.dateText.replace(',', ' ·').toUpperCase(),
   time: PARTY.timeText, venue: PARTY.venue.toUpperCase(), address: PARTY.address, note: PARTY.note,
-  rsvpNumber: PARTY.phoneShown,
 };
+const TEXT_KEYS = Object.keys(DEFAULT_TEXT);
+const LOCAL_TEXT = 'hp_cardText';
+const BASE_TITLE = PARTY.title, BASE_VENUE = PARTY.venue;
+function pickText(t) {
+  const out = {};
+  for (const k of TEXT_KEYS) if (t && typeof t[k] === 'string') out[k] = t[k];
+  return out;
+}
+// the host's edits: from their invite record (also what guests see), else saved on this device
+function savedText() {
+  if (PARTY.cardText) return pickText(PARTY.cardText);
+  if (document.body.classList.contains('invite')) return {};
+  try { return pickText(JSON.parse(localStorage.getItem(LOCAL_TEXT) || '{}')); } catch (e) { return {}; }
+}
+let party = { ...DEFAULT_TEXT, ...savedText(), rsvpNumber: PARTY.phoneShown };
+const textEdited = () => TEXT_KEYS.some(k => party[k] !== DEFAULT_TEXT[k]);
+// the page title, messages and countdown follow the card's title and venue
+function syncPageText() {
+  PARTY.title = `${party.title1} ${party.title2}`.trim() || BASE_TITLE;
+  PARTY.venue = party.venue === DEFAULT_TEXT.venue ? BASE_VENUE : party.venue || BASE_VENUE;
+  $('title').textContent = PARTY.title;
+}
+syncPageText();
 const DESCRIBE = {
   manor: 'bats burst from a full moon over a haunted manor',
   witch: 'a witch flies across a green moon above a bubbling cauldron',
@@ -555,7 +587,6 @@ function setActive(i) {
   for (const k of [i - 1, i, i + 1]) build(k);
   if (i !== active) { pause(cards[active]); active = i; }
   document.querySelectorAll('.dot').forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
-  $('deck-name').textContent = `${HauntCard.themeNames[cards[i].theme]} · ${i + 1} of ${cards.length}`;
   $('prev').disabled = i === 0; $('next').disabled = i === cards.length - 1;
   if (viewing) showInViewer();
 }
@@ -598,7 +629,7 @@ function showInViewer() {
   vcard.appendChild(c.svg);
   shownIdx = active;
   fitViewer();
-  if (location.protocol !== 'file:') videoBlob(c).catch(() => {});
+  if (location.protocol !== 'file:' && !textEdited()) videoBlob(c).catch(() => {});
   $('v-label').textContent = INVITE >= 0 ? HauntCard.themeNames[c.theme] : `${HauntCard.themeNames[c.theme]} · ${active + 1} of ${cards.length}`;
   $('v-prev').disabled = active === 0; $('v-next').disabled = active === cards.length - 1;
 }
@@ -641,7 +672,10 @@ $('v-next').addEventListener('click', () => step(1));
 $('v-replay').addEventListener('click', replay);
 
 /* ---------- share this card: link, PNG, or video ---------- */
-function toast(text) { const t = $('toast'); t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
+function toast(text) {
+  const t = $('toast'), host = document.fullscreenElement || document.webkitFullscreenElement || document.body; // full screen only shows the viewer
+  if (t.parentNode !== host) host.appendChild(t);
+  t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 const cardName = c => HauntCard.themeNames[c.theme];
 const fileBase = c => `halloween-invitation-${cardName(c).toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')}`;
 function cardLink(c) {
@@ -651,12 +685,18 @@ function cardLink(c) {
 }
 function saveFile(href, name) { const a = Object.assign(document.createElement('a'), { href, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
 // the current card's video is fetched ahead of time, so the share sheet opens straight away when tapped
+// with edited text the video is made in the browser instead, once per card and wording
 const videoCache = new Map();
-function videoBlob(c) {
-  if (!videoCache.has(c.theme)) videoCache.set(c.theme, fetch(`cards/${c.theme}.mp4`).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); })
-    .catch(e => { videoCache.delete(c.theme); throw e; }));
-  return videoCache.get(c.theme);
+function videoBlob(c, onProgress) {
+  const custom = textEdited(), key = custom ? `${c.theme}|${TEXT_KEYS.map(k => party[k]).join('|')}` : c.theme;
+  if (!videoCache.has(key)) {
+    const made = custom ? CardExport.video(c.theme, party, onProgress)
+      : fetch(`cards/${c.theme}.mp4`).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); });
+    videoCache.set(key, made.catch(e => { videoCache.delete(key); throw e; }));
+  }
+  return videoCache.get(key);
 }
+function setActLabel(btn, text) { btn.lastChild.nodeValue = text; }
 $('act-link').addEventListener('click', async () => {
   const c = cards[active], url = cardLink(c);
   const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url };
@@ -665,19 +705,29 @@ $('act-link').addEventListener('click', async () => {
     await navigator.clipboard.writeText(url); toast('Link copied');
   } catch (e) { if (e.name !== 'AbortError') { prompt('Copy this link:', url); } }
 });
-$('act-png').addEventListener('click', () => {
-  const c = cards[active];
+$('act-png').addEventListener('click', async () => {
+  const c = cards[active], btn = $('act-png');
   // phones get a tall 1290x2796 version that fills the whole screen; tablets/computers the 9:16 card
   const portrait = Math.min(innerWidth, innerHeight) / Math.max(innerWidth, innerHeight);
   const tall = matchMedia('(pointer: coarse)').matches && portrait < 0.52;
-  saveFile(`cards/${c.theme}${tall ? '-tall' : ''}.png`, `${fileBase(c)}.png`);
-  toast('Saving the image…');
+  if (!textEdited()) { saveFile(`cards/${c.theme}${tall ? '-tall' : ''}.png`, `${fileBase(c)}.png`); toast('Saving the image…'); return; }
+  btn.setAttribute('aria-busy', 'true');
+  toast('Making your image…');
+  try {
+    const u = URL.createObjectURL(await CardExport.png(c.theme, party, tall));
+    saveFile(u, `${fileBase(c)}.png`); setTimeout(() => URL.revokeObjectURL(u), 4000);
+    toast('Image saved');
+  } catch (e) {
+    console.warn(e); toast('Could not make the image. Please try again');
+  } finally { btn.removeAttribute('aria-busy'); }
 });
 $('act-video').addEventListener('click', async () => {
-  const c = cards[active], btn = $('act-video'), name = `${fileBase(c)}.mp4`;
+  const c = cards[active], btn = $('act-video'), name = `${fileBase(c)}.mp4`, custom = textEdited();
+  if (custom && !CardExport.canMakeVideo()) { toast('This browser cannot make a video with your text. Try Chrome or Safari'); return; }
   btn.setAttribute('aria-busy', 'true');
   try {
-    const blob = await videoBlob(c);
+    const blob = await videoBlob(c, p => setActLabel(btn, `MAKING ${Math.round(p * 100)}%`));
+    setActLabel(btn, 'SEND VIDEO');
     const file = new File([blob], name, { type: 'video/mp4' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇 ${cardLink(c)}` }); }
@@ -690,13 +740,15 @@ $('act-video').addEventListener('click', async () => {
       toast('Video downloaded. Attach it in WhatsApp');
     }
   } catch (e) {
-    saveFile(`cards/${c.theme}.mp4`, name); toast('Downloading the video…');
-  } finally { btn.removeAttribute('aria-busy'); }
+    if (custom) { console.warn(e); toast('Could not make the video. Please try again'); }
+    else { saveFile(`cards/${c.theme}.mp4`, name); toast('Downloading the video…'); }
+  } finally { btn.removeAttribute('aria-busy'); setActLabel(btn, 'SEND VIDEO'); }
 });
 window.addEventListener('popstate', () => closeViewer(true));
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && viewing && !document.webkitFullscreenElement) { /* user left fullscreen with a system gesture; keep the overlay open */ } });
 document.addEventListener('keydown', e => {
   if (!viewing) return;
+  if (edOpen) { if (e.key === 'Escape') closeEditor(); return; }
   if (e.key === 'Escape') closeViewer();
   if (e.key === 'ArrowRight') step(1);
   if (e.key === 'ArrowLeft') step(-1);
@@ -705,6 +757,7 @@ document.addEventListener('keydown', e => {
 let sx = 0, sy = 0, st = 0;
 viewer.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
 viewer.addEventListener('touchend', e => {
+  if (edOpen) return;
   const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
   if (Date.now() - st > 800) return;
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
@@ -712,6 +765,60 @@ viewer.addEventListener('touchend', e => {
 }, { passive: true });
 // tap on the dark area around the card closes it
 viewer.addEventListener('click', e => { if (e.target === viewer) closeViewer(); });
+
+/* ---------- edit the card text ---------- */
+const TEXT_LABELS = {
+  eyebrow: 'Top line', title1: 'Title, first line', title2: 'Title, second line', date: 'Date',
+  time: 'Time', venue: 'Venue', address: 'Address', note: 'Note',
+};
+const edWrap = $('ed-wrap'), edForm = $('editor');
+let edOpen = false;
+$('ed-fields').innerHTML = TEXT_KEYS.map(k =>
+  `<label class="ed-field ed-${k}"><span>${TEXT_LABELS[k]}</span><input name="${k}" type="text" maxlength="80" spellcheck="false"></label>`).join('');
+function setEdMsg(text) { $('ed-msg').textContent = text || ''; }
+function fillEditor(text) { for (const k of TEXT_KEYS) edForm.elements[k].value = text[k]; }
+function openEditor() {
+  fillEditor(party); setEdMsg('');
+  edWrap.classList.add('open'); edOpen = true;
+  if (!matchMedia('(pointer: coarse)').matches) edForm.elements.title1.focus(); // no surprise keyboard on phones
+}
+function closeEditor() { edWrap.classList.remove('open'); edOpen = false; }
+// rebuild every card that has been drawn so far with the new words
+function applyText(text) {
+  party = { ...DEFAULT_TEXT, ...text, rsvpNumber: PARTY.phoneShown };
+  syncPageText();
+  cards.forEach((c, i) => { if (c.card) { c.card = null; build(i); } });
+  if (viewing) fitViewer();
+}
+// on this device always; in the host's invite record too when signed in, so guest links match
+async function storeText(text) {
+  const isDefault = TEXT_KEYS.every(k => text[k] === DEFAULT_TEXT[k]);
+  try { if (isDefault) localStorage.removeItem(LOCAL_TEXT); else localStorage.setItem(LOCAL_TEXT, JSON.stringify(text)); } catch (e) {}
+  const email = window.HalloweenCustomer && HalloweenCustomer.getSessionEmail();
+  if (!email) return 'device';
+  try {
+    PARTY.cardText = await HalloweenCustomer.saveCardText(email, isDefault ? {} : text);
+    return 'cloud';
+  } catch (e) { console.warn('Card text not saved to the invite record.', e); return 'failed'; }
+}
+$('act-edit').addEventListener('click', openEditor);
+$('ed-cancel').addEventListener('click', closeEditor);
+$('ed-reset').addEventListener('click', () => { fillEditor(DEFAULT_TEXT); setEdMsg('Original text restored. Save to keep it.'); });
+edWrap.addEventListener('click', e => { if (e.target === edWrap) closeEditor(); });
+edForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const text = {};
+  for (const k of TEXT_KEYS) text[k] = edForm.elements[k].value.replace(/\s+/g, ' ').trim();
+  if (!text.title1 && !text.title2) { setEdMsg('Give the party a title.'); return; }
+  const btn = $('ed-save');
+  btn.disabled = true; setEdMsg('Saving…');
+  const where = await storeText(text);
+  btn.disabled = false;
+  applyText(text);
+  closeEditor();
+  toast(where === 'failed' ? 'Saved on this device only. Your links still show the old text'
+    : where === 'cloud' ? 'Saved. Your links show the new text too' : 'Saved');
+});
 
 /* opening: 5 seconds of moon, background and bats, then the page */
 function enter() {
@@ -783,7 +890,6 @@ $('fab-cal').addEventListener('click', () => { setFab(false); addToCalendar(); }
 for (const id of ['fab-yes', 'fab-no', 'fab-map']) $(id).addEventListener('click', () => setTimeout(() => setFab(false), 300));
 
 if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
-  $('fab-yes').href = $('btn-yes').href; $('fab-no').href = $('btn-no').href; $('fab-map').href = $('btn-map').href;
   setTimeout(() => $('fab-wrap').classList.add('ready'), (HauntCard.INTRO + 0.4) * 1000); // appears once the intro has played
   document.body.classList.remove('locked', 'splash');
   entered = true;
@@ -798,36 +904,21 @@ else if (document.body.classList.contains('host-studio') || (window.HalloweenCus
 }
 else setTimeout(() => $('gate-input').focus(), 300);
 
-$('replay').addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  setTimeout(replay, window.scrollY > 40 ? 350 : 0);
-});
-if (reduceMotion) $('replay').style.visibility = 'hidden';
 // pause the animation while the cards are off-screen to save battery
 new IntersectionObserver(([e]) => {
   visible = e.isIntersecting || viewing;
   if (!visible) { pause(cards[active]); cancelAnimationFrame(raf); raf = 0; } else run();
 }).observe(deck);
 
-document.querySelectorAll('.bat-icon').forEach(p => p.setAttribute('d', HauntCard.batPath(0.5)));
 
-/* ---------- text ---------- */
-$('title').textContent = PARTY.title;
-$('d-date').textContent = PARTY.dateText.toUpperCase();
-$('d-time').textContent = PARTY.timeText;
-$('d-venue').textContent = PARTY.venue.toUpperCase();
-$('d-address').textContent = PARTY.address || '';
-$('d-address').style.display = PARTY.address ? '' : 'none';
-$('d-note').textContent = PARTY.note;
-$('rsvp-by').textContent = PARTY.rsvpBy ? `${PARTY.rsvpBy}. Your reply goes to ${PARTY.hostName} on WhatsApp${PARTY.phoneShown ? ' (' + PARTY.phoneShown + ')' : ''}.` : '';
 
 /* ---------- RSVP via WhatsApp ---------- */
 const wa = text => `https://wa.me/${PARTY.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(text)}`; // empty number -> guest picks a chat
-$('btn-yes').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
-$('btn-no').href = wa(`Hello, sadly I cannot make it to ${PARTY.title} on ${PARTY.dateText}. Have a wonderfully spooky night! 🎃`);
+$('fab-yes').href = wa(`Hello! 🦇 I have received my summons and I WILL attend ${PARTY.title} on ${PARTY.dateText}. Name: `);
+$('fab-no').href = wa(`Hello, sadly I cannot make it to ${PARTY.title} on ${PARTY.dateText}. Have a wonderfully spooky night! 🎃`);
 
 /* ---------- directions ---------- */
-$('btn-map').href = window.HalloweenCustomer
+$('fab-map').href = window.HalloweenCustomer
   ? HalloweenCustomer.mapsHref(PARTY.mapsQuery)
   : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(PARTY.mapsQuery)}`;
 
@@ -874,19 +965,6 @@ function addToCalendar() {
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
-$('btn-cal').addEventListener('click', addToCalendar);
-
-/* ---------- share ---------- */
-$('btn-share').addEventListener('click', async () => {
-  const shareUrl = new URL(location.href.split('#')[0]);
-  if (window.__HP_PUBLIC_ID__) shareUrl.searchParams.set('c', window.__HP_PUBLIC_ID__);
-  const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url: shareUrl.toString() };
-  try {
-    if (navigator.share) { await navigator.share(data); return; }
-    await navigator.clipboard.writeText(data.url);
-    $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800);
-  } catch (e) { /* share sheet dismissed */ }
-});
 } // end startHalloweenApp
 </script>
 </body>

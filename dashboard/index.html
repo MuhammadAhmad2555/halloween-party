@@ -52,15 +52,14 @@
     font: 600 11px 'Cinzel', serif; letter-spacing: 2.5px; opacity: .8; font-style: normal;
   }
   .field { margin: 0 0 16px; }
-  input, textarea {
+  input {
     width: 100%; border-radius: 14px; border: 1.5px solid rgba(241, 230, 208, .35);
     background: rgba(10, 7, 23, .75); color: var(--cream);
     font: italic 500 18px 'Cormorant Garamond', Georgia, serif;
     padding: 14px 16px; outline: none; -webkit-appearance: none; appearance: none;
   }
-  textarea { min-height: 88px; resize: vertical; line-height: 1.35; }
-  input:focus, textarea:focus { border-color: var(--ember); box-shadow: 0 0 0 4px rgba(232, 131, 74, .18); }
-  input::placeholder, textarea::placeholder { color: rgba(241, 230, 208, .4); }
+  input:focus { border-color: var(--ember); box-shadow: 0 0 0 4px rgba(232, 131, 74, .18); }
+  input::placeholder { color: rgba(241, 230, 208, .4); }
   .hint { margin: 6px 0 0; font-size: 15px; color: rgba(233, 219, 196, .7); }
   .btn {
     display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -125,9 +124,6 @@
       <div class="preview" id="preview">
         <strong>Your invitation details</strong>
         <p id="pv-phone">Phone: —</p>
-        <p id="pv-time">Time: —</p>
-        <p id="pv-loc">Location: —</p>
-        <p id="pv-maps">Maps: —</p>
       </div>
 
       <form id="save-form">
@@ -135,21 +131,6 @@
           <label for="phone">Phone number</label>
           <input id="phone" name="phone" type="tel" autocomplete="tel" required placeholder="+44 7700 900123" aria-label="Phone number">
           <p class="hint">Include country code. Guests RSVP to this number on WhatsApp.</p>
-        </div>
-        <div class="field">
-          <label for="party-time">Party time</label>
-          <input id="party-time" name="timeText" type="text" required maxlength="80" placeholder="from eight o’clock in the evening" aria-label="Party time">
-          <p class="hint">Shown on your invitation cards (e.g. “from nine o’clock in the evening”).</p>
-        </div>
-        <div class="field">
-          <label for="location-name">Location name</label>
-          <input id="location-name" name="locationName" type="text" required maxlength="80" placeholder="Hollow House" aria-label="Location name">
-          <p class="hint">Shown on your invitation cards as the venue.</p>
-        </div>
-        <div class="field">
-          <label for="maps">Google Maps location</label>
-          <textarea id="maps" name="mapsLocation" required maxlength="500" placeholder="Paste a Google Maps link, or type the full address" aria-label="Google Maps location"></textarea>
-          <p class="hint">A Maps link or address. Used for the Directions button.</p>
         </div>
         <button class="btn primary" type="submit" id="save-go">Save</button>
       </form>
@@ -171,6 +152,14 @@
   const HC = window.HalloweenCustomer;
   let currentEmail = '';
   let currentData = null;
+  // ?edit keeps a host with a saved number on the dashboard so they can change it.
+  const editMode = new URLSearchParams(location.search).has('edit');
+
+  function goToStudio(data) {
+    HC.markHostStudio();
+    HC.rememberPublicId(data.publicId);
+    location.replace(HC.studioUrl(data.publicId));
+  }
 
   function setMsg(el, text, ok) {
     el.className = 'msg' + (ok ? ' ok' : '');
@@ -183,14 +172,8 @@
 
   function renderPreview(data) {
     $('pv-phone').textContent = 'Phone: ' + (data && data.phoneShown ? data.phoneShown : '—');
-    $('pv-time').textContent = 'Time: ' + (data && data.timeText ? data.timeText : '—');
-    $('pv-loc').textContent = 'Location: ' + (data && data.locationName ? data.locationName : '—');
-    $('pv-maps').textContent = 'Maps: ' + (data && data.mapsLocation ? data.mapsLocation : '—');
     if (data) {
       $('phone').value = data.phoneShown || '';
-      $('party-time').value = data.timeText || '';
-      $('location-name').value = data.locationName || '';
-      $('maps').value = data.mapsLocation || '';
       $('open-studio').href = HC.studioUrl(data.publicId);
       HC.rememberPublicId(data.publicId);
     } else {
@@ -214,9 +197,13 @@
     $('who').textContent = currentEmail;
     $('login-panel').classList.add('hidden');
     $('dash-panel').classList.remove('hidden');
-    $('page-sub').textContent = 'Your phone and party location power every invitation you send.';
+    $('page-sub').textContent = 'Your phone number powers every invitation you send.';
     try {
       currentData = await HC.loadCustomer(currentEmail);
+      if (currentData && currentData.phoneShown && !editMode) {
+        goToStudio(currentData);
+        return;
+      }
       renderPreview(currentData);
       setMsg($('dash-msg'), currentData ? '' : 'Save your details to connect them to your invitation cards.', !currentData);
     } catch (e) {
@@ -258,12 +245,7 @@
     e.preventDefault();
     if (!currentEmail) return;
     const go = $('save-go');
-    const fields = {
-      phoneShown: $('phone').value,
-      timeText: $('party-time').value,
-      locationName: $('location-name').value,
-      mapsLocation: $('maps').value,
-    };
+    const fields = { phoneShown: $('phone').value };
     const localErr = HC.validateCustomerFields(fields);
     if (localErr) { setMsg($('dash-msg'), localErr); return; }
     go.disabled = true;
