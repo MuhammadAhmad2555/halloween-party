@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
+  "name": "novexahub-halloween",
+  "compatibility_date": "2026-10-05",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    { "pattern": "novexahub.live/halloween*", "zone_name": "novexahub.live" },
+    { "pattern": "www.novexahub.live/halloween*", "zone_name": "novexahub.live" }
+  ],
+  "assets": {
+    "directory": "./.deploy",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
