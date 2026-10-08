@@ -288,8 +288,12 @@
     if (sessionStorage.getItem('hp_host_studio') === '1' || sessionStorage.getItem('hp_auth_email')) {
       document.body.classList.remove('locked');
       document.body.classList.add('host-studio');
+      return;
     }
   } catch (e) {}
+  // Everyone else starts at the email login; guest card links (?invite=) never get here.
+  document.body.style.display = 'none'; // no flash of the gate while leaving
+  location.replace('dashboard/');
 })();
 </script>
 <canvas id="bg" aria-hidden="true"></canvas>
