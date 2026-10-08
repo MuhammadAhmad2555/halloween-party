@@ -194,21 +194,26 @@
       return;
     }
     currentEmail = HC.normalizeEmail(email);
-    $('who').textContent = currentEmail;
     $('login-panel').classList.add('hidden');
-    $('dash-panel').classList.remove('hidden');
-    $('page-sub').textContent = 'Your phone number powers every invitation you send.';
+    $('page-sub').textContent = 'Opening your invitation…';
+    let loadErr = false;
     try {
       currentData = await HC.loadCustomer(currentEmail);
-      if (currentData && currentData.phoneShown && !editMode) {
-        goToStudio(currentData);
-        return;
-      }
-      renderPreview(currentData);
-      setMsg($('dash-msg'), currentData ? '' : 'Save your details to connect them to your invitation cards.', !currentData);
     } catch (e) {
-      setMsg($('dash-msg'), 'Could not load your record. Redeploy Firestore rules if you just changed them.');
+      currentData = null;
+      loadErr = true;
     }
+    // a host who already has a number goes straight to the studio; the form is only for first-timers
+    if (currentData && currentData.phoneShown && !editMode) {
+      goToStudio(currentData);
+      return;
+    }
+    $('who').textContent = currentEmail;
+    $('dash-panel').classList.remove('hidden');
+    $('page-sub').textContent = 'Your phone number powers every invitation you send.';
+    renderPreview(currentData);
+    if (loadErr) setMsg($('dash-msg'), 'Could not load your record. Redeploy Firestore rules if you just changed them.');
+    else setMsg($('dash-msg'), currentData ? '' : 'Save your phone number to connect it to your invitation cards.', !currentData);
   }
 
   function showLogin() {
@@ -252,8 +257,9 @@
     setMsg($('dash-msg'), 'Saving…');
     try {
       currentData = await HC.saveCustomer(currentEmail, fields);
+      if (!editMode) { goToStudio(currentData); return; } // first save: on to the studio
       renderPreview(currentData);
-      setMsg($('dash-msg'), 'Saved. Your invitation cards will use these details.', true);
+      setMsg($('dash-msg'), 'Saved. Your invitation cards will use this number.', true);
     } catch (err) {
       const msg = String((err && err.message) || err || '');
       if (/not authorized/i.test(msg) && !/permission|insufficient/i.test(msg)) {
@@ -290,7 +296,11 @@
       return;
     }
     const existing = HC.getSessionEmail();
-    if (existing) await enterDashboard(existing);
+    if (existing) {
+      $('login-panel').classList.add('hidden'); // already signed in this tab: no login flash
+      $('page-sub').textContent = 'Opening your invitation…';
+      await enterDashboard(existing);
+    }
   })();
 })();
   </script>

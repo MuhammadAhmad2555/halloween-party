@@ -176,6 +176,40 @@
   .ed-btn.primary { border-color: transparent; color: #1A0B06; background: var(--fab-bg, linear-gradient(180deg, #F29A5E, #D9692F));
     box-shadow: 0 6px 20px var(--fab-glow, rgba(232, 131, 74, .4)); }
   @media (max-width: 380px) { .ed-fields { grid-template-columns: 1fr; } }
+  /* making a video: centred progress dialog */
+  .mk-wrap { position: absolute; inset: 0; z-index: 8; display: none; align-items: center; justify-content: center; padding: 20px;
+    background: rgba(3, 2, 7, .72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .mk-wrap.open { display: flex; animation: vin .25s ease; }
+  .mk-box { width: min(340px, 100%); padding: 28px 22px 22px; border-radius: 26px; text-align: center; color: var(--cream);
+    background: linear-gradient(180deg, rgba(30, 20, 48, .97), rgba(10, 7, 20, .98)); border: 1px solid rgba(241, 230, 208, .16);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .6); }
+  .mk-dial { position: relative; width: 132px; height: 132px; margin: 0 auto 18px; }
+  .mk-dial > svg:first-child { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .mk-track { fill: none; stroke: rgba(241, 230, 208, .12); stroke-width: 8; }
+  .mk-ring { fill: none; stroke: var(--fab-accent, var(--ember)); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .2s linear;
+    filter: drop-shadow(0 0 6px var(--fab-glow, rgba(232, 131, 74, .5))); }
+  .mk-pct { position: absolute; inset: 0; display: grid; place-items: center; font: 700 30px 'Cinzel', serif; letter-spacing: 1px; color: #FFF0D6; }
+  .mk-done { position: absolute; inset: 0; margin: auto; width: 54px; height: 54px; color: var(--fab-accent, var(--ember)); display: none; }
+  .mk-wrap[data-state="ready"] .mk-pct, .mk-wrap[data-state="failed"] .mk-pct { display: none; }
+  .mk-wrap[data-state="ready"] .mk-done { display: block; }
+  .mk-box h2 { margin: 0; font: var(--title-weight, 700) 28px/1.1 var(--title-font, 'Grenze Gotisch'), serif; color: #FFF0D6; }
+  .mk-sub { margin: 8px 0 20px; font-size: 17px; color: var(--soft); }
+  .mk-btn { display: block; width: 100%; }
+  .mk-btn + .mk-btn { margin-top: 10px; }
+  .mk-btn[hidden] { display: none; }
+
+  /* the host's RSVP number, with a way to change it */
+  .host-phone { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; margin: 22px auto 0; padding: 10px 16px;
+    width: fit-content; max-width: 100%; border-radius: 999px; border: 1px solid rgba(241, 230, 208, .18); background: rgba(10, 7, 23, .5);
+    font-size: 17px; color: var(--soft); }
+  .host-phone[hidden] { display: none; }
+  .host-phone strong { color: var(--cream); font-weight: 600; white-space: nowrap; }
+  .hp-edit { border: 0; background: none; padding: 4px 2px; cursor: pointer; color: var(--fab-accent, var(--ember));
+    font: 700 11px 'Cinzel', serif; letter-spacing: 1.8px; text-transform: uppercase; -webkit-tap-highlight-color: transparent; }
+  .hp-edit:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .ph-wrap { position: fixed; z-index: 70; }
+  .ph-wrap .editor { width: min(440px, 100%); }
+  .ph-btns { grid-template-columns: 1fr 1.4fr; }
   @media (min-width: 700px) { .ed-wrap { align-items: center; } .editor { border-radius: 26px; border-bottom: 1px solid rgba(241, 230, 208, .16); padding-bottom: 20px; } }
   body.viewing { overflow: hidden; }
   /* card-only page opened from a shared link: no password, no dashboard */
@@ -333,6 +367,20 @@
     <button class="v-act" id="act-png" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>SAVE PNG</button>
     <button class="v-act primary" id="act-video" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg>SEND VIDEO</button>
   </div>
+  <div class="mk-wrap" id="mk-wrap" role="alertdialog" aria-modal="true" aria-labelledby="mk-title" aria-describedby="mk-sub">
+    <div class="mk-box">
+      <div class="mk-dial">
+        <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="mk-track" cx="60" cy="60" r="52"/><circle class="mk-ring" id="mk-ring" cx="60" cy="60" r="52"/></svg>
+        <span class="mk-pct" id="mk-pct" aria-live="off">0%</span>
+        <svg class="mk-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h2 id="mk-title">Making your video</h2>
+      <p class="mk-sub" id="mk-sub"></p>
+      <button class="ed-btn primary mk-btn" id="mk-send" type="button" hidden>Send video</button>
+      <button class="ed-btn mk-btn" id="mk-cancel" type="button">Cancel</button>
+      <button class="ed-btn mk-btn" id="mk-close" type="button" hidden>Close</button>
+    </div>
+  </div>
   <div class="ed-wrap" id="ed-wrap">
     <form class="editor" id="editor" aria-labelledby="ed-title" autocomplete="off">
       <h2 id="ed-title">Edit card text</h2>
@@ -385,6 +433,11 @@
     </div>
     <p class="cd-note" id="cd-note"></p>
 
+    <div class="host-phone" id="host-phone" hidden>
+      <span>RSVPs go to <strong id="hp-num"></strong></span>
+      <button class="hp-edit" id="hp-edit" type="button">Change number</button>
+    </div>
+
     <footer>HOLLOW HOUSE · XXXI · X</footer>
   </div>
 </main>
@@ -401,6 +454,18 @@
     <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
     RSVP
   </button>
+</div>
+<div class="ed-wrap ph-wrap" id="ph-wrap">
+  <form class="editor" id="ph-form" aria-labelledby="ph-title" autocomplete="on">
+    <h2 id="ph-title">Your phone number</h2>
+    <p class="ed-sub">Guests RSVP to this number on WhatsApp. Include the country code.</p>
+    <label class="ed-field"><span>Phone number</span><input id="ph-input" name="phone" type="tel" autocomplete="tel" maxlength="32" placeholder="+92 301 4761794"></label>
+    <p class="ed-msg" id="ph-msg" role="status" aria-live="polite"></p>
+    <div class="ed-btns ph-btns">
+      <button class="ed-btn" id="ph-cancel" type="button">Cancel</button>
+      <button class="ed-btn primary" id="ph-save" type="submit">Save</button>
+    </div>
+  </form>
 </div>
 <div class="toast" id="toast">Link copied</div>
 
@@ -496,7 +561,9 @@ function pickText(t) {
 // the host's edits: from their invite record (also what guests see), else saved on this device
 function savedText() {
   if (PARTY.cardText) return pickText(PARTY.cardText);
+  // guests and signed-in hosts see only the invite record, so the studio always matches the shared links
   if (document.body.classList.contains('invite')) return {};
+  if (window.HalloweenCustomer && HalloweenCustomer.getSessionEmail()) return {};
   try { return pickText(JSON.parse(localStorage.getItem(LOCAL_TEXT) || '{}')); } catch (e) { return {}; }
 }
 let party = { ...DEFAULT_TEXT, ...savedText(), rsvpNumber: PARTY.phoneShown };
@@ -543,6 +610,7 @@ function build(i) {
   return c;
 }
 let active = 0, visible = true, raf = 0, entered = false, viewing = false, shownIdx = -1;
+let making = null; // AbortController while a video is being made (see makeVideo)
 
 function frame(now) {
   const c = cards[active];
@@ -553,7 +621,7 @@ function frame(now) {
   raf = visible ? requestAnimationFrame(frame) : 0;
 }
 function pause(c) { if (c.clock !== null) { c.at = (performance.now() - c.clock) / 1000; c.clock = null; } }
-function run() { if (!reduceMotion && visible && entered && !raf) raf = requestAnimationFrame(frame); }
+function run() { if (!reduceMotion && visible && entered && !raf && !making) raf = requestAnimationFrame(frame); }
 
 function moonOnScreen(c) {
   const r = c.svg.getBoundingClientRect(), m = c.card.moon;
@@ -649,7 +717,8 @@ function openViewer() {
   if (fs && !/iPhone|iPod/.test(navigator.userAgent)) { try { const p = fs.call(viewer); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 }
 function closeViewer(fromHistory) {
-  if (!viewing || INVITE >= 0) return;
+  if (!viewing || INVITE >= 0 || making) return;
+  mkClose();
   viewing = false;
   if (shownIdx >= 0) { unfit(cards[shownIdx]); homeOf(cards[shownIdx]).prepend(cards[shownIdx].svg); }
   shownIdx = -1;
@@ -663,7 +732,7 @@ function closeViewer(fromHistory) {
   deck.scrollLeft = active * deck.clientWidth;
 }
 function step(d) {
-  if (INVITE >= 0) return;
+  if (INVITE >= 0 || making) return;
   const i = Math.max(0, Math.min(cards.length - 1, active + d));
   if (i === active) return;
   deck.scrollLeft = i * deck.clientWidth; // keeps the carousel in sync
@@ -687,19 +756,16 @@ function cardLink(c) {
   return u.toString();
 }
 function saveFile(href, name) { const a = Object.assign(document.createElement('a'), { href, download: name }); document.body.appendChild(a); a.click(); a.remove(); }
-// the current card's video is fetched ahead of time, so the share sheet opens straight away when tapped
-// with edited text the video is made in the browser instead, once per card and wording
+// the current card's ready-made video is fetched ahead of time, so the share sheet opens straight away when tapped
 const videoCache = new Map();
-function videoBlob(c, onProgress) {
-  const custom = textEdited(), key = custom ? `${c.theme}|${TEXT_KEYS.map(k => party[k]).join('|')}` : c.theme;
-  if (!videoCache.has(key)) {
-    const made = custom ? CardExport.video(c.theme, party, onProgress)
-      : fetch(`cards/${c.theme}.mp4`).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); });
-    videoCache.set(key, made.catch(e => { videoCache.delete(key); throw e; }));
-  }
-  return videoCache.get(key);
+function videoBlob(c) {
+  if (!videoCache.has(c.theme)) videoCache.set(c.theme, fetch(`cards/${c.theme}.mp4`).then(r => { if (!r.ok) throw new Error(r.status); return r.blob(); })
+    .catch(e => { videoCache.delete(c.theme); throw e; }));
+  return videoCache.get(c.theme);
 }
-function setActLabel(btn, text) { btn.lastChild.nodeValue = text; }
+// videos made in the browser for edited text, once per card and wording
+const madeVideos = new Map();
+const madeKey = c => `${c.theme}|${TEXT_KEYS.map(k => party[k]).join('|')}`;
 $('act-link').addEventListener('click', async () => {
   const c = cards[active], url = cardLink(c);
   const data = { title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇`, url };
@@ -724,34 +790,105 @@ $('act-png').addEventListener('click', async () => {
     console.warn(e); toast('Could not make the image. Please try again');
   } finally { btn.removeAttribute('aria-busy'); }
 });
+// opens the share sheet; browsers only allow that soon after a tap, so a long wait means asking for one more
+async function shareVideo(c, blob) {
+  const name = `${fileBase(c)}.mp4`, file = new File([blob], name, { type: 'video/mp4' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇 ${cardLink(c)}` }); }
+    catch (e) {
+      if (e.name === 'NotAllowedError') return 'needs-tap';
+      if (e.name !== 'AbortError') throw e;
+    }
+    return 'done';
+  }
+  const u = URL.createObjectURL(blob); saveFile(u, name); setTimeout(() => URL.revokeObjectURL(u), 4000);
+  toast('Video downloaded. Attach it in WhatsApp');
+  return 'done';
+}
+
+/* making a video: a dialog over the card with progress and Cancel; nothing else can be tapped until it ends */
+const mk = { wrap: $('mk-wrap'), title: $('mk-title'), sub: $('mk-sub'), pct: $('mk-pct'), ring: $('mk-ring'),
+  cancel: $('mk-cancel'), send: $('mk-send'), close: $('mk-close') };
+const RING = 2 * Math.PI * 52;
+mk.ring.style.strokeDasharray = RING;
+function mkProgress(p) {
+  mk.ring.style.strokeDashoffset = RING * (1 - p);
+  mk.pct.textContent = `${Math.round(p * 100)}%`;
+}
+function mkState(state) {
+  mk.wrap.dataset.state = state;
+  mk.title.textContent = { making: 'Making your video', ready: 'Your video is ready', failed: 'Could not make the video' }[state];
+  mk.sub.textContent = {
+    making: 'Keep this screen open. It takes about a minute.',
+    ready: 'Tap Send video to share it on WhatsApp or anywhere else.',
+    failed: 'Something went wrong. Please try again.',
+  }[state];
+  mk.cancel.hidden = state !== 'making';
+  mk.send.hidden = state !== 'ready';
+  mk.close.hidden = state === 'making';
+}
+function mkClose() { mk.wrap.classList.remove('open'); mk.send.onclick = null; }
+async function makeVideo(c) {
+  const ctrl = new AbortController(), key = madeKey(c);
+  making = ctrl;
+  // the card behind the dialog holds still, leaving the computer free to make the video
+  pause(cards[active]); cancelAnimationFrame(raf); raf = 0;
+  mkProgress(0); mkState('making'); mk.wrap.classList.add('open');
+  mk.cancel.focus();
+  let blob;
+  try {
+    blob = await CardExport.video(c.theme, party, mkProgress, ctrl.signal);
+  } catch (e) {
+    making = null; run();
+    if (e.name === 'AbortError') { mkClose(); toast('Video cancelled'); }
+    else { console.warn(e); mkState('failed'); }
+    return;
+  }
+  making = null; run();
+  madeVideos.set(key, blob);
+  mkProgress(1);
+  // try the share sheet right away; most browsers refuse this long after the tap, so offer the button
+  let r = 'needs-tap';
+  try { r = await shareVideo(c, blob); } catch (e) { console.warn(e); }
+  if (r === 'done') { mkClose(); return; }
+  mkState('ready');
+  mk.send.onclick = async () => {
+    try { if (await shareVideo(c, blob) === 'done') mkClose(); } catch (e) { console.warn(e); toast('Could not open sharing. Please try again'); }
+  };
+  mk.send.focus();
+}
+mk.cancel.addEventListener('click', () => { if (making) making.abort(); });
+mk.close.addEventListener('click', mkClose);
+window.addEventListener('beforeunload', e => { if (making) { e.preventDefault(); e.returnValue = ''; } });
+
 $('act-video').addEventListener('click', async () => {
-  const c = cards[active], btn = $('act-video'), name = `${fileBase(c)}.mp4`, custom = textEdited();
-  if (custom && !CardExport.canMakeVideo()) { toast('This browser cannot make a video with your text. Try Chrome or Safari'); return; }
+  const c = cards[active], btn = $('act-video');
+  if (textEdited()) {
+    if (madeVideos.has(madeKey(c))) { // made already: share straight away
+      try { if (await shareVideo(c, madeVideos.get(madeKey(c))) === 'needs-tap') toast('Tap Send video again'); }
+      catch (e) { console.warn(e); toast('Could not open sharing. Please try again'); }
+      return;
+    }
+    if (!CardExport.canMakeVideo()) { toast('This browser cannot make a video with your text. Try Chrome or Safari'); return; }
+    makeVideo(c);
+    return;
+  }
   btn.setAttribute('aria-busy', 'true');
   try {
-    const blob = await videoBlob(c, p => setActLabel(btn, `MAKING ${Math.round(p * 100)}%`));
-    setActLabel(btn, 'SEND VIDEO');
-    const file = new File([blob], name, { type: 'video/mp4' });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: PARTY.title, text: `You are summoned to ${PARTY.title} 🦇 ${cardLink(c)}` }); }
-      catch (e) {
-        if (e.name === 'NotAllowedError') toast('Video ready. Tap Send video again');
-        else if (e.name !== 'AbortError') throw e;
-      }
-    } else {
-      const u = URL.createObjectURL(blob); saveFile(u, name); setTimeout(() => URL.revokeObjectURL(u), 4000);
-      toast('Video downloaded. Attach it in WhatsApp');
-    }
+    if (await shareVideo(c, await videoBlob(c)) === 'needs-tap') toast('Video ready. Tap Send video again');
   } catch (e) {
-    if (custom) { console.warn(e); toast('Could not make the video. Please try again'); }
-    else { saveFile(`cards/${c.theme}.mp4`, name); toast('Downloading the video…'); }
-  } finally { btn.removeAttribute('aria-busy'); setActLabel(btn, 'SEND VIDEO'); }
+    saveFile(`cards/${c.theme}.mp4`, `${fileBase(c)}.mp4`); toast('Downloading the video…');
+  } finally { btn.removeAttribute('aria-busy'); }
 });
-window.addEventListener('popstate', () => closeViewer(true));
+window.addEventListener('popstate', () => {
+  if (making) { history.pushState({ viewer: 1 }, ''); return; } // stay on the card until the video is done or cancelled
+  closeViewer(true);
+});
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && viewing && !document.webkitFullscreenElement) { /* user left fullscreen with a system gesture; keep the overlay open */ } });
 document.addEventListener('keydown', e => {
   if (!viewing) return;
   if (edOpen) { if (e.key === 'Escape') closeEditor(); return; }
+  if (mk.wrap.classList.contains('open')) return;
   if (e.key === 'Escape') closeViewer();
   if (e.key === 'ArrowRight') step(1);
   if (e.key === 'ArrowLeft') step(-1);
@@ -760,7 +897,7 @@ document.addEventListener('keydown', e => {
 let sx = 0, sy = 0, st = 0;
 viewer.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; st = Date.now(); }, { passive: true });
 viewer.addEventListener('touchend', e => {
-  if (edOpen) return;
+  if (edOpen || mk.wrap.classList.contains('open')) return;
   const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
   if (Date.now() - st > 800) return;
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) step(dx < 0 ? 1 : -1);
@@ -794,15 +931,16 @@ function applyText(text) {
   if (viewing) fitViewer();
 }
 // on this device always; in the host's invite record too when signed in, so guest links match
+// signed-in hosts: into their invite record (guest links read it); otherwise on this device
 async function storeText(text) {
   const isDefault = TEXT_KEYS.every(k => text[k] === DEFAULT_TEXT[k]);
-  try { if (isDefault) localStorage.removeItem(LOCAL_TEXT); else localStorage.setItem(LOCAL_TEXT, JSON.stringify(text)); } catch (e) {}
   const email = window.HalloweenCustomer && HalloweenCustomer.getSessionEmail();
-  if (!email) return 'device';
-  try {
-    PARTY.cardText = await HalloweenCustomer.saveCardText(email, isDefault ? {} : text);
+  if (email) {
+    PARTY.cardText = await HalloweenCustomer.saveCardText(email, isDefault ? {} : text); // throws if not saved
     return 'cloud';
-  } catch (e) { console.warn('Card text not saved to the invite record.', e); return 'failed'; }
+  }
+  try { if (isDefault) localStorage.removeItem(LOCAL_TEXT); else localStorage.setItem(LOCAL_TEXT, JSON.stringify(text)); } catch (e) {}
+  return 'device';
 }
 $('act-edit').addEventListener('click', openEditor);
 $('ed-cancel').addEventListener('click', closeEditor);
@@ -815,13 +953,57 @@ edForm.addEventListener('submit', async e => {
   if (!text.title1 && !text.title2) { setEdMsg('Give the party a title.'); return; }
   const btn = $('ed-save');
   btn.disabled = true; setEdMsg('Saving…');
-  const where = await storeText(text);
+  let where;
+  try { where = await storeText(text); }
+  catch (err) {
+    // nothing changes unless it saved, so the cards, PNG, video and links never disagree
+    console.warn('Card text not saved.', err);
+    setEdMsg(/permission|insufficient/i.test(String(err && err.message)) ? 'Could not save (Firestore rules blocked it). Nothing was changed.'
+      : `${(err && err.message) || 'Could not save.'} Nothing was changed.`);
+    btn.disabled = false;
+    return;
+  }
   btn.disabled = false;
   applyText(text);
   closeEditor();
-  toast(where === 'failed' ? 'Saved on this device only. Your links still show the old text'
-    : where === 'cloud' ? 'Saved. Your links show the new text too' : 'Saved');
+  toast(where === 'cloud' ? 'Saved. Cards, PNG, video and your links all use the new text' : 'Saved');
 });
+
+/* ---------- the host's RSVP number (signed-in hosts only) ---------- */
+const hostEmail = window.HalloweenCustomer ? HalloweenCustomer.getSessionEmail() : '';
+const phWrap = $('ph-wrap');
+function showHostPhone() {
+  $('hp-num').textContent = PARTY.phoneShown || 'not set';
+  $('host-phone').hidden = !hostEmail || INVITE >= 0;
+}
+function closePhone() { phWrap.classList.remove('open'); }
+$('hp-edit').addEventListener('click', () => {
+  $('ph-input').value = PARTY.phoneShown || '';
+  $('ph-msg').textContent = '';
+  phWrap.classList.add('open');
+  if (!matchMedia('(pointer: coarse)').matches) $('ph-input').focus();
+});
+$('ph-cancel').addEventListener('click', closePhone);
+phWrap.addEventListener('click', e => { if (e.target === phWrap) closePhone(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && phWrap.classList.contains('open')) closePhone(); });
+$('ph-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const phoneShown = $('ph-input').value.trim(), msg = $('ph-msg'), btn = $('ph-save');
+  const err = HalloweenCustomer.validatePhone(phoneShown);
+  if (err) { msg.textContent = err; return; }
+  btn.disabled = true; msg.textContent = 'Saving…';
+  try {
+    const saved = await HalloweenCustomer.saveCustomer(hostEmail, { phoneShown });
+    PARTY.phoneShown = saved.phoneShown; PARTY.whatsapp = saved.whatsapp;
+    party.rsvpNumber = saved.phoneShown;
+    showHostPhone(); closePhone();
+    toast('Number saved. RSVPs now go to ' + saved.phoneShown);
+  } catch (e2) {
+    console.warn(e2);
+    msg.textContent = /permission|insufficient/i.test(String(e2 && e2.message)) ? 'Could not save (Firestore rules blocked it).' : (e2 && e2.message) || 'Could not save.';
+  } finally { btn.disabled = false; }
+});
+showHostPhone();
 
 /* opening: 5 seconds of moon, background and bats, then the page */
 function enter() {

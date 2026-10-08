@@ -4,7 +4,7 @@
 (function (global) {
   const NS = 'http://www.w3.org/2000/svg';
   const MUXER_URL = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.min.js';
-  const FPS = 30, SECONDS = 10, STILL_AT = 9.5;
+  const FPS = 30, SECONDS = 10, STILL_AT = 9.5, LOOKAHEAD = 3;
   const fontCache = new Map();
 
   function base64(buf) {
@@ -52,19 +52,23 @@
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
       const xs = new XMLSerializer(), style = `<style>${faces}</style>`;
-      async function draw(t) {
+      // a frame is captured (as SVG text) at once, then decoded in the background, so the next frames
+      // can decode while this one is drawn
+      function prepare(t) {
         card.setTime(t);
         const xml = xs.serializeToString(svg).replace(/<svg\b[^>]*>/, m => m + style);
         const url = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml' }));
-        try {
-          const img = new Image();
-          img.src = url;
-          await img.decode();
-          ctx.drawImage(img, 0, 0, w, h);
-        } finally { URL.revokeObjectURL(url); }
+        const img = new Image();
+        img.src = url;
+        return img.decode().then(() => ({ img, url }), e => { URL.revokeObjectURL(url); throw e; });
       }
+      function paint({ img, url }) {
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+      }
+      const draw = async t => paint(await prepare(t));
       await draw(STILL_AT); // first draw lets the inlined fonts settle before anything is kept
-      return { canvas, draw, done: () => box.remove() };
+      return { canvas, draw, prepare, paint, done: () => box.remove() };
     } catch (e) { box.remove(); throw e; }
   }
 
@@ -93,10 +97,12 @@
     throw new Error('This browser cannot encode H.264 video.');
   }
 
-  // the same 10-second, 1080x1920, 30 fps H.264 MP4 as the ready-made files
-  async function video(theme, party, onProgress) {
+  // the same 10-second, 1080x1920, 30 fps H.264 MP4 as the ready-made files; `signal` cancels it
+  async function video(theme, party, onProgress, signal) {
+    const stopIfCancelled = () => { if (signal && signal.aborted) throw new DOMException('Video cancelled', 'AbortError'); };
     if (!canMakeVideo()) throw new Error('This browser cannot make videos.');
     if (!global.Mp4Muxer) await loadScript(MUXER_URL);
+    stopIfCancelled();
     const W = 1080, H = 1920, N = FPS * SECONDS;
     const cfg = await pickCodec(W, H);
     const muxer = new Mp4Muxer.Muxer({
@@ -107,10 +113,18 @@
     let failure = null;
     const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => { failure = e; } });
     enc.configure(cfg);
-    const r = await rig(theme, party, W, H);
+    let r = null;
+    const ahead = []; // frames decoding in the background
+    // frame 0 is the finished card: chat apps use it as the thumbnail, and the intro starts in darkness
+    const timeOf = i => (i === 0 ? STILL_AT : i / FPS);
     try {
+      r = await rig(theme, party, W, H);
+      for (let i = 0; i < Math.min(LOOKAHEAD, N); i++) ahead.push(r.prepare(timeOf(i)));
       for (let i = 0; i < N; i++) {
-        await r.draw(i / FPS);
+        stopIfCancelled();
+        const ready = await ahead.shift();
+        if (i + LOOKAHEAD < N) ahead.push(r.prepare(timeOf(i + LOOKAHEAD)));
+        r.paint(ready);
         const frame = new VideoFrame(r.canvas, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
         enc.encode(frame, { keyFrame: i % (FPS * 2) === 0 });
         frame.close();
@@ -123,7 +137,8 @@
       muxer.finalize();
       return new Blob([muxer.target.buffer], { type: 'video/mp4' });
     } finally {
-      r.done();
+      for (const p of ahead) p.then(f => URL.revokeObjectURL(f.url), () => {});
+      if (r) r.done();
       if (enc.state !== 'closed') enc.close();
     }
   }
