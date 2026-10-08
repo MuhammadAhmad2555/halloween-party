@@ -26,7 +26,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Grenze+Gotisch:wght@700&family=Mystery+Quest&family=Creepster&family=Cinzel+Decorative:wght@700&family=UnifrakturMaguntia&family=Uncial+Antiqua&family=Pirata+One&family=Sancreek&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Grenze+Gotisch:wght@700&family=Mystery+Quest&family=Creepster&family=Cinzel+Decorative:wght@700&family=UnifrakturMaguntia&family=Uncial+Antiqua&family=Pirata+One&family=Sancreek&family=Jolly+Lodger&family=Marcellus+SC&family=New+Rocker&family=Rubik+Wet+Paint&family=Henny+Penny&display=swap" rel="stylesheet">
 <style>
   :root { --bg: #0A0717; --cream: #F1E6D0; --soft: #E9DBC4; --ember: #E8834A; --line: rgba(241, 230, 208, .22); }
   * { box-sizing: border-box; }
@@ -176,6 +176,9 @@
   .ed-btn.primary { border-color: transparent; color: #1A0B06; background: var(--fab-bg, linear-gradient(180deg, #F29A5E, #D9692F));
     box-shadow: 0 6px 20px var(--fab-glow, rgba(232, 131, 74, .4)); }
   @media (max-width: 380px) { .ed-fields { grid-template-columns: 1fr; } }
+  /* while a video is made, nothing under the full-screen card paints */
+  body.rendering #bg, body.rendering .graveyard, body.rendering .spider, body.rendering .web, body.rendering main { visibility: hidden; }
+  body.rendering .vbtn, body.rendering .v-label, body.rendering .v-actions { -webkit-backdrop-filter: none; backdrop-filter: none; }
   /* making a video: centred progress dialog */
   .mk-wrap { position: absolute; inset: 0; z-index: 8; display: none; align-items: center; justify-content: center; padding: 20px;
     background: rgba(3, 2, 7, .72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
@@ -472,6 +475,15 @@
 <script src="art.js"></script>
 <script src="bg.js"></script>
 <script src="intro.js"></script>
+<script>
+// Hosts arriving from the login get the moon intro at once; Firebase and their invite load behind it
+// (startHalloweenApp picks the intro up when it is ready, instead of starting it late).
+window.__hpSplash = { started: false, done: false, onDone: null };
+if (document.body.classList.contains('host-studio') && window.PageIntro) {
+  window.__hpSplash.started = true;
+  PageIntro.splash(5, () => { const sp = window.__hpSplash; sp.done = true; if (sp.onDone) sp.onDone(); });
+}
+</script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -584,6 +596,11 @@ const DESCRIBE = {
   forest: 'glowing eyes and an owl in a moonlit forest',
   ship: 'a ghost ship and a lighthouse on a moonlit sea',
   carnival: 'a turning Ferris wheel and circus tent at a haunted carnival',
+  skeleton: 'two skeletons dancing under a bone-white moon',
+  mummy: 'a mummy shuffling past a torch-lit temple below the pyramids',
+  wolf: 'a wolf howling at a huge silver moon from a cliff',
+  lab: 'sparks leaping between tesla coils outside a mad scientist\u2019s tower',
+  rooftops: 'a black cat prowling across moonlit city rooftops',
 };
 const deck = $('deck');
 // each slide builds its card the first time it is needed.
@@ -707,14 +724,13 @@ function showInViewer() {
 function openViewer() {
   if (viewing) return;
   viewing = true;
+  if (window.PageBG) PageBG.pause();
   document.body.classList.add('viewing');
   viewer.classList.add('open');
   showInViewer();
   visible = true; run();
   if (INVITE >= 0) return;
   history.pushState({ viewer: 1 }, '');
-  const fs = viewer.requestFullscreen || viewer.webkitRequestFullscreen;
-  if (fs && !/iPhone|iPod/.test(navigator.userAgent)) { try { const p = fs.call(viewer); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 }
 function closeViewer(fromHistory) {
   if (!viewing || INVITE >= 0 || making) return;
@@ -726,8 +742,7 @@ function closeViewer(fromHistory) {
   document.documentElement.style.backgroundColor = '';
   viewer.classList.remove('open');
   document.body.classList.remove('viewing');
-  const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
-  if (fsEl) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  if (window.PageBG) PageBG.resume();
   if (!fromHistory && history.state && history.state.viewer) history.back();
   deck.scrollLeft = active * deck.clientWidth;
 }
@@ -745,8 +760,7 @@ $('v-replay').addEventListener('click', replay);
 
 /* ---------- share this card: link, PNG, or video ---------- */
 function toast(text) {
-  const t = $('toast'), host = document.fullscreenElement || document.webkitFullscreenElement || document.body; // full screen only shows the viewer
-  if (t.parentNode !== host) host.appendChild(t);
+  const t = $('toast');
   t.textContent = text; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
 const cardName = c => HauntCard.themeNames[c.theme];
 const fileBase = c => `halloween-invitation-${cardName(c).toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '')}`;
@@ -831,20 +845,22 @@ function mkClose() { mk.wrap.classList.remove('open'); mk.send.onclick = null; }
 async function makeVideo(c) {
   const ctrl = new AbortController(), key = madeKey(c);
   making = ctrl;
-  // the card behind the dialog holds still, leaving the computer free to make the video
+  // the card behind the dialog holds still and the page under the viewer stops painting, leaving the
+  // computer free to make the video, however big the window is
   pause(cards[active]); cancelAnimationFrame(raf); raf = 0;
+  document.body.classList.add('rendering');
   mkProgress(0); mkState('making'); mk.wrap.classList.add('open');
   mk.cancel.focus();
   let blob;
   try {
     blob = await CardExport.video(c.theme, party, mkProgress, ctrl.signal);
   } catch (e) {
-    making = null; run();
+    making = null; run(); document.body.classList.remove('rendering');
     if (e.name === 'AbortError') { mkClose(); toast('Video cancelled'); }
     else { console.warn(e); mkState('failed'); }
     return;
   }
-  making = null; run();
+  making = null; run(); document.body.classList.remove('rendering');
   madeVideos.set(key, blob);
   mkProgress(1);
   // try the share sheet right away; most browsers refuse this long after the tap, so offer the button
@@ -884,7 +900,6 @@ window.addEventListener('popstate', () => {
   if (making) { history.pushState({ viewer: 1 }, ''); return; } // stay on the card until the video is done or cancelled
   closeViewer(true);
 });
-document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && viewing && !document.webkitFullscreenElement) { /* user left fullscreen with a system gesture; keep the overlay open */ } });
 document.addEventListener('keydown', e => {
   if (!viewing) return;
   if (edOpen) { if (e.key === 'Escape') closeEditor(); return; }
@@ -1085,7 +1100,9 @@ if (INVITE >= 0) setTimeout(() => { // after the rest of the page script has run
 else if (document.body.classList.contains('host-studio') || (window.HalloweenCustomer && HalloweenCustomer.isHostStudioUnlock())) {
   // Came from the customer dashboard — no password, same moon intro as after the gate
   document.body.classList.remove('locked');
-  setTimeout(() => PageIntro.splash(5, enter), 0);
+  const sp = window.__hpSplash;
+  if (sp && sp.started) { if (sp.done) enter(); else sp.onDone = enter; } // already playing since the page opened
+  else setTimeout(() => PageIntro.splash(5, enter), 0);
 }
 else setTimeout(() => $('gate-input').focus(), 300);
 

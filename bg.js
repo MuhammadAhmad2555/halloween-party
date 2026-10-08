@@ -165,11 +165,18 @@
 
   resize();
   window.addEventListener('resize', resize);
+  // the full-screen card covers the page, so the background can rest meanwhile (it scales with the window)
+  window.PageBG = { pause() {}, resume() {} };
   if (reduce) { draw(3, 0); return; }
-  let last = performance.now(), start = last;
-  (function loop(now) {
+  let last = performance.now(), start = last, raf = 0;
+  function loop(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     draw((now - start) / 1000, dt);
-    requestAnimationFrame(loop);
-  })(last);
+    raf = requestAnimationFrame(loop);
+  }
+  loop(last);
+  window.PageBG = {
+    pause() { cancelAnimationFrame(raf); raf = 0; },
+    resume() { if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); } },
+  };
 })();

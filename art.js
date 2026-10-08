@@ -1,5 +1,5 @@
-/* Halloween invitation artwork: three themed cards sharing one layout.
-   Themes: 'manor' (The Haunted Manor), 'witch' (The Witching Hour), 'patch' (The Pumpkin Patch).
+/* Halloween invitation artwork: themed cards sharing one layout.
+   Thirteen themed cards (see THEMES), e.g. 'manor' (The Haunted Manor), 'skeleton' (The Skeleton Ball).
    Shared by the renderer (card/render.html) and the website (site/index.html).
    Usage: const card = HauntCard.create(svgElement, { theme, text, grain, lite, party });
           await card.ready; card.setTime(seconds);
@@ -105,6 +105,56 @@
       ground: ['#1A0A26', '#0D0514', '#06020A'], fog: ['#F0C8F0', '#C890D0'],
       accent: '#FF8AD8', soft: '#F0DCEC', title: ['#FFF2FA', '#FFB8E6'], titleGlow: '#D03FA0', bat: '#04010A',
       webs: false, spider: false, cloud: null,
+    },
+    skeleton: {
+      font: ['Jolly Lodger', 400],
+      name: 'The Skeleton Ball',
+      sky: ['#07060F', '#141026', '#241A3E', '#33264F', '#3E2E58'],
+      moon: { x: 540, y: 700, r: 215, c: ['#FFFFF4', '#EDEBD8', '#C9C5A8', '#9E9878'], crater: '#ADA88A', glow: ['#F2F0D8', '#9C8CD0'] },
+      horizon: '#B9A6F0', far: '#2A2140', back: '#1D172E', mid: '#120E1E', sil: '#08060E',
+      ground: ['#151022', '#0B0814', '#06040A'], fog: ['#E6E0FF', '#B8AEE0'],
+      accent: '#CDB8FF', soft: '#E6E0F0', title: ['#FFFFF6', '#E4DCC2'], titleGlow: '#8E7CE0', bat: '#030208',
+      webs: true, spider: false, cloud: '#130F22',
+    },
+    mummy: {
+      font: ['Marcellus SC', 400],
+      name: 'The Mummy\u2019s Tomb',
+      sky: ['#040812', '#0A1526', '#14243A', '#3A3A48', '#6A5240'],
+      moon: { x: 680, y: 700, r: 210, c: ['#FFF8E2', '#F8E2A6', '#E2B866', '#B98A3E'], crater: '#C69A52', glow: ['#FFE2A0', '#D99A3A'] },
+      horizon: '#F0B060', far: '#3A3040', back: '#2A2232', mid: '#1A1420', sil: '#0A070C',
+      ground: ['#2A1E1A', '#140E0C', '#0A0706'], fog: ['#F4DCB0', '#D8B880'],
+      accent: '#F2C063', soft: '#EEDFC4', title: ['#FFF6DC', '#F2CC80'], titleGlow: '#D9902A', bat: '#05030A',
+      webs: false, spider: false, cloud: '#1A1A26',
+    },
+    wolf: {
+      font: ['New Rocker', 400],
+      name: 'The Werewolf\u2019s Howl',
+      sky: ['#03050C', '#0A1022', '#141E3A', '#22304E', '#2E3C58'],
+      moon: { x: 620, y: 740, r: 250, c: ['#FFFFFF', '#E4ECF8', '#B4C4DE', '#8296B8'], crater: '#97A8C6', glow: ['#E0EAFF', '#7A92C8'] },
+      horizon: '#8AA2D8', far: '#1A2236', back: '#121A2A', mid: '#0B111C', sil: '#04070C',
+      ground: ['#0E1420', '#070B12', '#030508'], fog: ['#DCE6FA', '#A8B8DC'],
+      accent: '#FFC24A', soft: '#DDE4F0', title: ['#F8FBFF', '#C8D6EE'], titleGlow: '#5A7AC8', bat: '#02030A',
+      webs: false, spider: false, cloud: '#0C1426',
+    },
+    lab: {
+      font: ['Rubik Wet Paint', 400],
+      name: 'The Mad Scientist\u2019s Lab',
+      sky: ['#05030E', '#120A2A', '#1E1046', '#2C1A5A', '#3A2468'],
+      moon: { x: 290, y: 690, r: 175, c: ['#F4FFFF', '#C8F4FF', '#88D8F0', '#4FA8D0'], crater: '#6CC0DE', glow: ['#B8F4FF', '#5A8CFF'] },
+      horizon: '#7AD8FF', far: '#24183E', back: '#1A1030', mid: '#100A20', sil: '#06040C',
+      ground: ['#140E24', '#0A0714', '#05030A'], fog: ['#D8E8FF', '#A0B8F0'],
+      accent: '#7DF9FF', soft: '#DDE6F6', title: ['#F2FFFF', '#A8F0FF'], titleGlow: '#3A8CFF', bat: '#03020A',
+      webs: true, spider: false, cloud: '#140C2C',
+    },
+    rooftops: {
+      font: ['Henny Penny', 400],
+      name: 'The Black Cat Rooftops',
+      sky: ['#070614', '#141030', '#22184A', '#3A2458', '#5A3058'],
+      moon: { x: 700, y: 710, r: 200, c: ['#FFF8EA', '#FBE4C0', '#EEC08A', '#D29A62'], crater: '#D8A878', glow: ['#FFE2B8', '#E89A6A'] },
+      horizon: '#F0A070', far: '#2E2244', back: '#221834', mid: '#160F24', sil: '#0A0712',
+      ground: ['#181024', '#0C0816', '#06040C'], fog: ['#F0D8F0', '#C8A8D8'],
+      accent: '#FFC870', soft: '#EEDFE8', title: ['#FFF6EC', '#FFD2A0'], titleGlow: '#E8704A', bat: '#04020A',
+      webs: false, spider: false, cloud: '#1A1230',
     },
   };
 
@@ -1024,7 +1074,447 @@
       });
     }
 
-    ({ manor: sceneManor, witch: sceneWitch, patch: scenePatch, grave: sceneGrave, vamp: sceneVamp, forest: sceneForest, ship: sceneShip, carnival: sceneCarnival })[theme]();
+
+    /* ---------- the five newer scenes ---------- */
+    const BONE = '#EDE8D6';
+    // a dancing skeleton, feet at (x, y); pose(t) returns the joint angles. Bones get a dark outline
+    // so they still read in front of a pale moon.
+    const BONE_EDGE = '#120C1E';
+    function skeleton(x, y, s, pose) {
+      const root = el('g');
+      const body = el('g', {}, root);
+      const L = { arm: [44, 40], leg: [54, 52] };
+      const edged = { stroke: BONE_EDGE, 'stroke-width': 4, 'paint-order': 'stroke', 'stroke-linejoin': 'round' };
+      const limb = w => {
+        const under = el('path', { fill: 'none', stroke: BONE_EDGE, 'stroke-width': w + 5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, body);
+        const over = el('path', { fill: 'none', stroke: BONE, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, body);
+        return [under, over];
+      };
+      const legs = [limb(7), limb(7)], arms = [limb(6), limb(6)];
+      const ends = [0, 1, 2, 3].map(() => el('circle', { r: 5.5, fill: BONE, ...edged, 'stroke-width': 3 }, body));
+      el('path', { d: 'M-18,-6 C-20,-22 -8,-30 0,-30 C8,-30 20,-22 18,-6 L10,4 L-10,4Z', fill: BONE, ...edged }, body);
+      for (const dx of [-8, 8]) el('ellipse', { cx: dx, cy: -14, rx: 4.5, ry: 6, fill: BONE_EDGE }, body);
+      for (let vy = -38; vy >= -128; vy -= 9) el('rect', { x: -4.5, y: vy, width: 9, height: 6, rx: 2, fill: BONE, ...edged, 'stroke-width': 3 }, body);
+      const ribPath = [];
+      for (let i = 0; i < 5; i++) {
+        const ry = -114 + i * 10, w = 27 - i * 2.6;
+        ribPath.push(`M-3,${ry} Q${f2(-w - 4)},${ry - 6} ${f2(-w + 3)},${ry + 11} M3,${ry} Q${f2(w + 4)},${ry - 6} ${f2(w - 3)},${ry + 11}`);
+      }
+      el('path', { d: ribPath.join(' '), fill: 'none', stroke: BONE_EDGE, 'stroke-width': 8, 'stroke-linecap': 'round' }, body);
+      el('path', { d: ribPath.join(' '), fill: 'none', stroke: BONE, 'stroke-width': 4, 'stroke-linecap': 'round' }, body);
+      el('path', { d: 'M-26,-124 L26,-124', stroke: BONE_EDGE, 'stroke-width': 9, 'stroke-linecap': 'round' }, body);
+      el('path', { d: 'M-26,-124 L26,-124', stroke: BONE, 'stroke-width': 5, 'stroke-linecap': 'round' }, body);
+      const head = el('g', {}, body);
+      el('path', { d: 'M-21,-152 C-21,-178 21,-178 21,-152 C21,-142 16,-138 12,-136 L-12,-136 C-16,-138 -21,-142 -21,-152Z', fill: BONE, ...edged }, head);
+      for (const dx of [-8, 8]) el('ellipse', { cx: dx, cy: -153, rx: 6, ry: 7, fill: BONE_EDGE }, head);
+      el('path', { d: 'M-3,-143 L3,-143 L0,-149Z', fill: BONE_EDGE }, head);
+      const jaw = el('path', { d: 'M-12,-136 L12,-136 L10,-125 C4,-122 -4,-122 -10,-125Z', fill: BONE, ...edged, 'stroke-width': 3 }, head);
+      el('path', { d: 'M-6,-136 L-6,-131 M0,-136 L0,-131 M6,-136 L6,-131', stroke: BONE_EDGE, 'stroke-width': 1.6 }, head);
+      const chain = (ox, oy, a1, a2, l1, l2) => {
+        const ex = ox + l1 * Math.sin(a1), ey = oy + l1 * Math.cos(a1);
+        const hx = ex + l2 * Math.sin(a1 + a2), hy = ey + l2 * Math.cos(a1 + a2);
+        return [`M${f2(ox)},${f2(oy)} L${f2(ex)},${f2(ey)} L${f2(hx)},${f2(hy)}`, hx, hy];
+      };
+      anim.push(t => {
+        const p = pose(t);
+        const set = (pair, end, d) => { pair[0].setAttribute('d', d[0]); pair[1].setAttribute('d', d[0]); end.setAttribute('cx', f2(d[1])); end.setAttribute('cy', f2(d[2])); };
+        set(arms[0], ends[0], chain(-26, -124, p.la[0], p.la[1], L.arm[0], L.arm[1]));
+        set(arms[1], ends[1], chain(26, -124, p.ra[0], p.ra[1], L.arm[0], L.arm[1]));
+        set(legs[0], ends[2], chain(-10, -2, p.ll[0], p.ll[1], L.leg[0], L.leg[1]));
+        set(legs[1], ends[3], chain(10, -2, p.rl[0], p.rl[1], L.leg[0], L.leg[1]));
+        head.setAttribute('transform', `rotate(${f2(p.head)} 0 -134)`);
+        jaw.setAttribute('transform', `translate(0,${f2(p.jaw)})`);
+        body.setAttribute('transform', `rotate(${f2(p.sway)} 0 0)`);
+        root.setAttribute('transform', `translate(${f2(x + (p.dx || 0))},${f2(y - 106 * s + p.bounce)}) scale(${s})`);
+      });
+      return root;
+    }
+
+    function sceneSkeleton() {
+      hills();
+      // a ruined ballroom of arches on the far hill
+      const ru = el('g', { fill: T.far });
+      el('path', { d: 'M250,960 L250,800 A70,70 0 0 1 390,800 L390,960 L366,960 L366,806 A46,46 0 0 0 274,806 L274,960Z' }, ru);
+      el('path', { d: 'M690,960 L690,812 A70,70 0 0 1 830,812 L830,960 L806,960 L806,818 A46,46 0 0 0 714,818 L714,960Z' }, ru);
+      el('path', { d: 'M830,960 L830,880 L860,868 L852,960Z M236,960 L230,900 L250,892 L250,960Z' }, ru);
+      backHill();
+      midHill();
+      graves([[120, 1056, 26, 40, -6], [180, 1046, 22, 32, 4], [900, 1046, 26, 38, 5], [960, 1056, 22, 30, -4]], [[250, 1040, 0.9, 6], [830, 1040, 0.9, -5]]);
+      fogBand(1045, 7, 3, 70, 14, 0.9);
+      tree(70, 1215, 91, 1, 0.8);
+      tree(1010, 1210, 92, -1, 0.75);
+      // string of skull lanterns across the dance floor
+      el('path', { d: 'M150,860 Q540,980 930,860', fill: 'none', stroke: T.sil, 'stroke-width': 2.5 });
+      const skulls = [];
+      for (let i = 1; i < 8; i++) {
+        const u = i / 8, sx = (1 - u) * (1 - u) * 150 + 2 * u * (1 - u) * 540 + u * u * 930;
+        const sy = (1 - u) * (1 - u) * 860 + 2 * u * (1 - u) * 980 + u * u * 860 + 14;
+        const g = el('g', { transform: `translate(${f2(sx)},${f2(sy)})` });
+        const glow = el('circle', { cx: 0, cy: 8, r: 46, fill: url('accentGlow') }, g);
+        el('path', { d: 'M-12,8 C-12,-10 12,-10 12,8 C12,14 9,16 6,17 L-6,17 C-9,16 -12,14 -12,8Z', fill: '#F4EED8' }, g);
+        for (const dx of [-5, 5]) el('circle', { cx: dx, cy: 6, r: 3.2, fill: '#FFB85A' }, g);
+        skulls.push({ glow, ph: i * 0.9 });
+      }
+      anim.push(t => { for (const k of skulls) k.glow.setAttribute('opacity', f2(0.55 + 0.45 * Math.sin(TAU * t / 1.6 + k.ph))); });
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.35);
+      // two skeletons dancing to the same beat
+      const dancer = (ph, side) => t => {
+        const b = TAU * t * 1.05 + ph, up = Math.max(0, Math.sin(b)), dn = Math.max(0, -Math.sin(b));
+        return {
+          bounce: -12 * Math.abs(Math.sin(b)), sway: 7 * Math.sin(b) * side, head: 12 * Math.sin(b * 2 + 1), jaw: 2 + 4 * Math.max(0, Math.sin(b * 4)),
+          la: [-(2.4 + 0.35 * Math.sin(b * 2)), -(0.6 + 0.5 * Math.sin(b * 2 + 1))],
+          ra: [1.4 + 0.5 * Math.sin(b + Math.PI), 1.1 + 0.6 * Math.sin(b * 2)],
+          ll: [-0.08 - 0.75 * up, 1.2 * up], rl: [0.08 + 0.75 * dn, -1.2 * dn],
+          dx: 18 * Math.sin(b / 2) * side,
+        };
+      };
+      skeleton(395, 1172, 1.55, dancer(0, 1));
+      // her partner is the same figure, mirrored, dancing half a beat behind
+      const mirror = el('g', { transform: 'translate(1080,0) scale(-1,1)' });
+      mirror.appendChild(skeleton(395, 1172, 1.55, dancer(Math.PI, 1)));
+      // a bony hand waving from its grave
+      const hand = el('g', { fill: 'none', stroke: BONE, 'stroke-width': 5, 'stroke-linecap': 'round' });
+      const fingers = [-14, -6, 2, 10].map(() => el('path', {}, hand));
+      el('path', { d: 'M0,40 L0,0 M8,40 L8,2', 'stroke-width': 6 }, hand);
+      el('path', { d: 'M-16,0 C-16,-14 16,-14 16,0Z', fill: BONE, stroke: 'none' }, hand);
+      const thumb = el('path', {}, hand);
+      el('path', { d: 'M-40,44 C-20,30 30,30 50,44Z', fill: T.ground[1], stroke: 'none' }, hand);
+      anim.push(t => {
+        const w = Math.sin(TAU * t / 1.8);
+        hand.setAttribute('transform', `translate(870,1150) rotate(${f2(10 * w)}) scale(1.2)`);
+        [-13, -5, 3, 11].forEach((fx, i) => {
+          const c = 0.3 + 0.35 * Math.sin(TAU * t / 1.8 + i * 0.6);
+          fingers[i].setAttribute('d', `M${fx},-8 L${f2(fx + 2 * Math.sin(c))},${f2(-24 - 4 * (i % 2))} L${f2(fx + 10 * Math.sin(c))},${f2(-36 - 3 * (i % 2) + 6 * c)}`);
+        });
+        thumb.setAttribute('d', `M-14,-2 L-26,-14 L${f2(-30 - 4 * w)},-28`);
+      });
+      fireflies(10, 41, 140, 940, 880, 1160, '#F4EEFF');
+    }
+
+    function sceneMummy() {
+      // dunes and pyramids
+      el('path', { d: `M${-XMAX},960 L0,960 C140,930 260,950 380,958 C520,966 640,936 780,940 C900,944 990,962 1080,950 L${W + XMAX},950 L${W + XMAX},1200 L${-XMAX},1200Z`, fill: T.far });
+      const py = el('g', { fill: T.back });
+      el('path', { d: 'M520,958 L700,770 L880,958Z' }, py);
+      el('path', { d: 'M820,958 L930,850 L1040,958Z M150,958 L250,860 L350,958Z' }, py);
+      const shade = el('g', { fill: T.mid, opacity: 0.7 });
+      el('path', { d: 'M700,770 L880,958 L760,958Z M930,850 L1040,958 L960,958Z M250,860 L350,958 L280,958Z' }, shade);
+      // obelisk and palms
+      el('path', { d: 'M440,1000 L446,840 L454,826 L462,840 L468,1000Z', fill: T.mid });
+      const palm = (x, y, sc, lean) => {
+        const g = el('g', { fill: T.sil, transform: `translate(${x},${y}) scale(${sc})` });
+        el('path', { d: `M-6,0 C-4,-60 ${lean * 10},-140 ${lean * 26},-200 L${lean * 26 + 8},-198 C${lean * 16},-140 6,-60 6,0Z` }, g);
+        const fronds = el('g', {}, g);
+        for (let i = 0; i < 7; i++) {
+          const a = -150 + i * 50, r = a * Math.PI / 180;
+          el('path', { d: `M0,0 Q${f2(46 * Math.cos(r + 0.3))},${f2(46 * Math.sin(r + 0.3) - 20)} ${f2(92 * Math.cos(r))},${f2(92 * Math.sin(r) + 30)} Q${f2(40 * Math.cos(r - 0.2))},${f2(40 * Math.sin(r - 0.2) - 4)} 0,6Z` }, fronds);
+        }
+        anim.push(t => fronds.setAttribute('transform', `translate(${lean * 26 + 4},-200) rotate(${f2(4 * Math.sin(TAU * t / 3.4 + x))})`));
+      };
+      palm(110, 1090, 1.1, 1); palm(190, 1080, 0.75, -1); palm(985, 1095, 1.2, -1);
+      el('path', { d: `M${-XMAX},1040 L0,1040 C160,1010 320,1000 470,1008 C600,1014 700,1004 820,1012 C940,1020 1010,1036 1080,1046 L${W + XMAX},1046 L${W + XMAX},1300 L${-XMAX},1300Z`, fill: T.mid });
+      // the temple gate: two sloping pylons, a lintel, a glowing doorway and two torches
+      const tomb = el('g', { fill: T.sil });
+      el('path', { d: 'M372,1104 L394,952 L500,952 L508,1104Z M572,1104 L580,952 L686,952 L708,1104Z' }, tomb);
+      el('path', { d: 'M386,954 L508,954 L508,938 L382,938Z M572,954 L694,954 L698,938 L572,938Z M494,1002 L586,1002 L586,980 L494,980Z' }, tomb);
+      const glyphs = el('g', { fill: '#3A2C34', opacity: 0.9 }, tomb);
+      for (const x0 of [414, 600]) for (let r = 0; r < 5; r++) for (let c = 0; c < 3; c++) {
+        const gx = x0 + c * 24 + r * 1.2, gy = 976 + r * 24;
+        el('path', { d: (r + c) % 3 === 0 ? `M${gx},${gy} l6,-12 l6,12Z` : (r + c) % 3 === 1 ? `M${gx + 6},${gy - 6} m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0` : `M${gx},${gy - 10} h12 v3 h-12Z M${gx + 4},${gy - 7} h4 v8 h-4Z` }, glyphs);
+      }
+      const doorway = el('path', { d: 'M508,1104 L508,1002 L572,1002 L572,1104Z', fill: '#F7B860', opacity: 0.55 });
+      const dGlow = el('circle', { cx: 540, cy: 1060, r: 150, fill: url('glow') });
+      for (const x of [350, 730]) el('path', { d: `M${x - 4},1104 L${x - 4},1030 L${x + 4},1030 L${x + 4},1104Z M${x - 12},1030 L${x + 12},1030 L${x + 8},1020 L${x - 8},1020Z`, fill: T.sil });
+      const torches = el('g');
+      candleFlame(350, 1020, 40, 12, 0.3, torches);
+      candleFlame(730, 1020, 40, 12, 2.1, torches);
+      anim.push(t => { const v = 0.75 + 0.15 * Math.sin(TAU * 2.6 * t) + 0.1 * Math.sin(TAU * 6.1 * t); doorway.setAttribute('opacity', f2(0.4 + 0.25 * v)); dGlow.setAttribute('opacity', f2(v)); });
+      fogBand(1060, 6, 23, 70, 14, 0.6);
+      foreground();
+      // blowing sand
+      const Rs = rng(616), grains = [];
+      for (let i = 0; i < 26; i++) grains.push({ n: el('rect', { height: 1.6, rx: 1, fill: '#F4D8A0' }), y: 960 + Rs() * 240, l: 20 + Rs() * 60, v: 160 + Rs() * 240, o: Rs() * 1400, a: 0.15 + Rs() * 0.35 });
+      anim.push(t => { for (const g of grains) { const x = ((t * g.v + g.o) % 1400) - 160; g.n.setAttribute('x', f2(x)); g.n.setAttribute('y', f2(g.y + 6 * Math.sin(t + g.o))); g.n.setAttribute('width', f2(g.l)); g.n.setAttribute('opacity', f2(g.a)); } });
+      // the mummy shuffles along the sand, arms out
+      const m = el('g');
+      const WRAP = '#D9C9A2', LINE = '#7E6A48';
+      const legL = el('path', { fill: WRAP, stroke: LINE, 'stroke-width': 1.5 }, m), legR = el('path', { fill: WRAP, stroke: LINE, 'stroke-width': 1.5 }, m);
+      el('path', { d: 'M-26,-70 C-30,-120 -26,-160 -18,-176 L18,-176 C26,-160 30,-120 26,-70Z', fill: WRAP, stroke: LINE, 'stroke-width': 1.5 }, m);
+      for (let i = 0; i < 9; i++) el('path', { d: `M-27,${-80 - i * 11} Q0,${-86 - i * 11 + (i % 2 ? 6 : -4)} 27,${-76 - i * 11}`, fill: 'none', stroke: LINE, 'stroke-width': 1.4 }, m);
+      const arms = el('g', {}, m);
+      for (const [y0, k] of [[-160, 0], [-148, 1]]) {
+        el('path', { d: `M-10,${y0} L74,${y0 - 4} C82,${y0 - 3} 84,${y0 + 9} 76,${y0 + 11} L-10,${y0 + 14}Z`, fill: WRAP, stroke: LINE, 'stroke-width': 1.4 }, arms);
+        for (let i = 0; i < 4; i++) el('path', { d: `M${10 + i * 16},${y0 - 2} L${16 + i * 16},${y0 + 13}`, stroke: LINE, 'stroke-width': 1.2 }, arms);
+      }
+      el('path', { d: 'M-18,-176 C-24,-206 -12,-222 0,-222 C14,-222 24,-206 18,-176Z', fill: WRAP, stroke: LINE, 'stroke-width': 1.5 }, m);
+      for (let i = 0; i < 4; i++) el('path', { d: `M-20,${-184 - i * 9} Q0,${-178 - i * 9} 20,${-188 - i * 9}`, fill: 'none', stroke: LINE, 'stroke-width': 1.3 }, m);
+      const eyes = el('g', { fill: '#FFD86A' }, m);
+      el('circle', { cx: 2, cy: -202, r: 3 }, eyes); el('circle', { cx: 13, cy: -202, r: 3 }, eyes);
+      el('circle', { cx: 8, cy: -202, r: 16, fill: url('glow'), opacity: 0.8 }, eyes);
+      const strip = el('path', { fill: 'none', stroke: WRAP, 'stroke-width': 5, 'stroke-linecap': 'round' }, m);
+      anim.push(t => {
+        const P = 22, u = (t / P + 0.25) % 1, dir = u < 0.5 ? 1 : -1, k = u < 0.5 ? u * 2 : (1 - u) * 2;
+        const x = 250 + k * 580, step = TAU * t * 0.9, sw = Math.sin(step);
+        legL.setAttribute('d', `M-22,-72 L-6,-72 L${f2(-6 + 10 * sw)},0 L${f2(-24 + 10 * sw)},0Z`);
+        legR.setAttribute('d', `M6,-72 L22,-72 L${f2(24 - 10 * sw)},0 L${f2(6 - 10 * sw)},0Z`);
+        arms.setAttribute('transform', `rotate(${f2(4 * Math.sin(step * 0.5))} 0 -154)`);
+        strip.setAttribute('d', `M-24,-120 C-50,${f2(-110 + 12 * sw)} -70,${f2(-90 - 10 * sw)} -96,${f2(-86 + 14 * Math.sin(step + 1))}`);
+        eyes.setAttribute('opacity', f2(0.7 + 0.3 * Math.sin(TAU * t / 1.3)));
+        m.setAttribute('transform', `translate(${f2(x)},${f2(1178 - 4 * Math.abs(sw))}) scale(${dir * 1.3},1.3) rotate(${f2(3 * sw)})`);
+      });
+      fogBand(1168, 6, 11, 90, 18, 0.3);
+    }
+
+    function sceneWolf() {
+      // pine-covered hills
+      hills();
+      const pine = (x, y, h, color, parent) => {
+        let d = `M${f2(x - 3)},${f2(y)} L${f2(x - 3)},${f2(y - h * 0.15)} `;
+        for (let i = 0; i < 4; i++) {
+          const ty = y - h * (0.15 + i * 0.22), w = h * (0.34 - i * 0.07);
+          d += `M${f2(x - w)},${f2(ty)} L${f2(x)},${f2(ty - h * 0.36)} L${f2(x + w)},${f2(ty)}Z `;
+        }
+        el('path', { d: d + `M${f2(x - 4)},${f2(y)} L${f2(x + 4)},${f2(y)} L${f2(x + 4)},${f2(y - h * 0.2)} L${f2(x - 4)},${f2(y - h * 0.2)}Z`, fill: color }, parent);
+      };
+      const Rp = rng(212);
+      const far = el('g');
+      for (let x = -600; x < W + 600; x += 26 + Rp() * 20) pine(x, 958 + Rp() * 10, 50 + Rp() * 40, T.far, far);
+      backHill();
+      const mid = el('g');
+      for (let x = -600; x < W + 600; x += 44 + Rp() * 36) if (x < 560 || x > 1040) pine(x, 1010 + Rp() * 14, 90 + Rp() * 70, T.back, mid);
+      // glowing eyes among the trees
+      const eyes = [];
+      for (const [x, y, s] of [[150, 960, 0.8], [330, 990, 0.7], [470, 1000, 0.6], [80, 1030, 0.9]]) {
+        const g = el('g', { transform: `translate(${x},${y}) scale(${s})` });
+        el('circle', { cx: 0, cy: 0, r: 28, fill: url('accentGlow'), opacity: 0.5 }, g);
+        const lid = el('g', { fill: '#FFD45A' }, g);
+        el('path', { d: 'M-14,0 L-4,-3 L-6,3Z M14,0 L4,-3 L6,3Z' }, lid);
+        eyes.push({ g, lid, ph: x * 0.013, p: 6 + (x % 5) });
+      }
+      anim.push(t => {
+        for (const e of eyes) {
+          const c = (t + e.ph * 10) % e.p, on = c < e.p - 1.4;
+          e.g.setAttribute('opacity', on ? f2(Math.min(1, c * 1.5)) : 0);
+          e.lid.setAttribute('transform', `scale(1,${(c % 3.1) > 2.95 ? 0.1 : 1})`);
+        }
+      });
+      // the cliff and the howling werewolf
+      el('path', { d: `M${W + XMAX},860 L1080,860 L960,872 L880,890 L812,906 L760,930 L742,960 L720,1000 L700,1060 L${W + XMAX},1060Z`, fill: T.mid });
+      el('path', { d: 'M790,912 L770,940 L790,936 L800,960Z M860,894 L846,920 L868,914Z', fill: T.back });
+      // a wolf sits on the cliff edge and howls at the moon every few seconds
+      const wolf = el('g', { fill: T.sil });
+      el('path', { d: 'M-38,0 C-36,-30 -34,-60 -36,-84 C-46,-100 -54,-122 -52,-144 C-50,-162 -44,-176 -36,-188 L-4,-206 C8,-194 18,-180 24,-164 C36,-144 52,-120 70,-92 C84,-70 98,-44 96,-20 C95,-10 90,-4 84,0 L60,0 C62,-14 56,-28 44,-36 C38,-24 30,-12 26,0 L10,0 C12,-20 6,-44 -8,-60 C-14,-40 -18,-20 -18,0Z' }, wolf);
+      const tail = el('path', { d: 'M88,-16 C112,-22 138,-14 156,4 C150,12 140,12 132,8 C120,10 104,8 90,2Z' }, wolf);
+      el('path', { d: 'M-52,-150 L-62,-140 L-53,-134 L-61,-124 L-50,-120 L-56,-108 L-44,-104Z' }, wolf);
+      const head = el('g', {}, wolf);
+      el('path', { d: 'M-24,10 C-28,-6 -36,-22 -48,-40 L-62,-62 C-66,-68 -62,-74 -55,-71 L-40,-62 C-30,-56 -20,-54 -12,-56 L-8,-80 L4,-58 L10,-74 L16,-52 C24,-44 28,-30 28,-16 C28,-2 22,8 14,14Z' }, head);
+      el('path', { d: 'M-48,-40 L-60,-50 L-58,-42 C-56,-38 -52,-36 -48,-36Z' }, head);
+      const eye = el('ellipse', { cx: -22, cy: -46, rx: 3.4, ry: 2.2, fill: '#FFC24A' }, head);
+      const rings = [0, 1, 2].map(() => el('path', { fill: 'none', stroke: '#E0EAFF', 'stroke-width': 3, 'stroke-linecap': 'round' }, wolf));
+      anim.push(t => {
+        const c = t % 6, howl = c > 2.2 && c < 4.8 ? Math.sin(Math.PI * (c - 2.2) / 2.6) : 0;
+        head.setAttribute('transform', `translate(-20,-190) rotate(${f2(-40 + 40 * howl)})`);
+        eye.setAttribute('opacity', f2(1 - howl));
+        tail.setAttribute('transform', `rotate(${f2(-4 * Math.sin(TAU * t / 3))} 90 -6)`);
+        rings.forEach((r, i) => {
+          const u = (c - 2.6) / 2.0 - i * 0.22;
+          if (howl <= 0.05 || u <= 0 || u >= 1) { r.setAttribute('opacity', 0); return; }
+          const rr = 16 + u * 70, ox = -84, oy = -258;
+          r.setAttribute('d', `M${f2(ox - rr * 0.95)},${f2(oy + rr * 0.3)} A${f2(rr)},${f2(rr)} 0 0 1 ${f2(ox - rr * 0.1)},${f2(oy - rr)}`);
+          r.setAttribute('opacity', f2(0.6 * (1 - u)));
+        });
+        wolf.setAttribute('transform', `translate(860,${f2(892 + 1 * Math.sin(TAU * t / 2.2))}) scale(1.15)`);
+      });
+      midHill();
+      fogBand(1045, 7, 3, 70, 14, 0.9);
+      const near = el('g');
+      for (const [x, h] of [[40, 380], [130, 300], [990, 360], [1060, 420]]) pine(x, 1210, h, T.sil, near);
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.45);
+    }
+
+    function sceneLab() {
+      hills();
+      backHill();
+      // crag with the laboratory tower
+      el('path', { d: `M${-XMAX},1000 L120,1000 C200,980 240,940 280,930 L620,930 C660,950 700,990 760,1010 L${W + XMAX},1010 L${W + XMAX},1200 L${-XMAX},1200Z`, fill: T.mid });
+      const tw = el('g', { fill: T.sil });
+      el('path', { d: 'M340,940 L352,640 L548,640 L560,940Z' }, tw);
+      for (let x = 344; x < 556; x += 26) el('rect', { x, y: 622, width: 16, height: 20 }, tw);
+      el('path', { d: 'M560,940 L572,760 L660,760 L672,940Z M556,748 L676,748 L616,690Z' }, tw);
+      el('path', { d: 'M450,640 L450,520 M444,540 L456,540 M438,560 L462,560', stroke: T.sil, 'stroke-width': 6 }, tw);
+      const lab = el('path', { d: 'M400,760 L400,700 A50,50 0 0 1 500,700 L500,760Z', fill: '#7DF9FF', opacity: 0.6 }, tw);
+      const labGlow = el('circle', { cx: 450, cy: 730, r: 140, fill: url('accentGlow') }, tw);
+      // the monster's silhouette rises in the window now and then
+      const mon = el('path', { d: 'M428,760 L430,730 C428,716 436,708 450,708 C464,708 472,716 470,730 L472,760Z M436,712 L464,712 L464,704 L436,704Z', fill: T.sil, opacity: 0 }, tw);
+      lightWindow(616, 800, 22, 40, tw, windows, url('win'), url('accentGlow'));
+      lightWindow(390, 860, 18, 34, tw, windows); lightWindow(510, 860, 18, 34, tw, windows);
+      flickerWindows();
+      // lightning strikes the rod
+      const flash = el('rect', { x: -XMAX, y: -YMAX, width: W + 2 * XMAX, height: 1300 + YMAX, fill: '#CFF8FF', opacity: 0 });
+      const bolt = el('path', { fill: 'none', stroke: '#F2FFFF', 'stroke-width': 4, 'stroke-linejoin': 'round', opacity: 0 });
+      anim.push(t => {
+        const c = t % 6.4, on = (c > 3.9 && c < 4.0) || (c > 4.12 && c < 4.3);
+        flash.setAttribute('opacity', on ? 0.28 : 0);
+        if (on) {
+          const R = rng(Math.floor(t * 20)); let d = 'M560,0', x = 560;
+          for (let y = 60; y < 520; y += 60) { x += (450 - x) * 0.3 + (R() - 0.5) * 70; d += ` L${f2(x)},${y}`; }
+          bolt.setAttribute('d', d + ' L450,520');
+        }
+        bolt.setAttribute('opacity', on ? 1 : 0);
+        const v = on ? 1 : 0.7 + 0.2 * Math.sin(TAU * t * 2.3) + 0.1 * Math.sin(TAU * t * 7.1);
+        lab.setAttribute('opacity', f2(0.45 + 0.4 * v)); labGlow.setAttribute('opacity', f2(v));
+        const r = c > 4.3 && c < 6.0 ? Math.sin(Math.PI * (c - 4.3) / 1.7) : 0;
+        mon.setAttribute('opacity', f2(r)); mon.setAttribute('transform', `translate(0,${f2(30 * (1 - r))})`);
+      });
+      midHill();
+      fogBand(1050, 7, 3, 70, 14, 0.8);
+      // the slab between two tesla coils, with sparks jumping across
+      const slab = el('g', { fill: T.sil });
+      el('path', { d: 'M380,1150 L392,1100 L688,1100 L700,1150Z M420,1150 L420,1180 L440,1180 L440,1150Z M640,1150 L640,1180 L660,1180 L660,1150Z' }, slab);
+      el('path', { d: 'M430,1100 C430,1084 446,1076 470,1078 L600,1080 C620,1078 640,1084 650,1096 L652,1100Z' }, slab);
+      el('path', { d: 'M420,1098 C412,1082 418,1066 432,1062 C446,1060 454,1070 454,1082Z M424,1066 L452,1062 L452,1056 L424,1060Z' }, slab);
+      const twitch = el('path', { fill: 'none', stroke: T.sil, 'stroke-width': 8, 'stroke-linecap': 'round' }, slab);
+      const coil = x => {
+        const g = el('g', { fill: T.sil });
+        el('path', { d: `M${x - 30},1180 L${x - 18},1000 L${x + 18},1000 L${x + 30},1180Z` }, g);
+        for (let y = 1010; y < 1170; y += 14) el('rect', { x: x - 22 + (y - 1000) * 0.06, y, width: 44 - (y - 1000) * 0.12, height: 5, fill: '#4A6C88', opacity: 0.8 }, g);
+        el('ellipse', { cx: x, cy: 990, rx: 44, ry: 18 }, g);
+        el('ellipse', { cx: x, cy: 984, rx: 36, ry: 10, fill: '#2A3A58' }, g);
+        return el('circle', { cx: x, cy: 990, r: 90, fill: url('accentGlow') });
+      };
+      const g1 = coil(240), g2 = coil(840);
+      const arcs = [0, 1].map(() => ({ glow: el('path', { fill: 'none', stroke: '#7DF9FF', 'stroke-width': 12, opacity: 0.25, 'stroke-linejoin': 'round' }), core: el('path', { fill: 'none', stroke: '#F2FFFF', 'stroke-width': 2.6, 'stroke-linejoin': 'round' }) }));
+      anim.push(t => {
+        const k = Math.floor(t * 14), live = (t % 3) < 2.2;
+        arcs.forEach((a, j) => {
+          if (!live) { a.glow.setAttribute('opacity', 0); a.core.setAttribute('opacity', 0); return; }
+          const R = rng(k * 7 + j * 101); let d = '';
+          const n = 9;
+          for (let i = 0; i <= n; i++) {
+            const u = i / n, x = (j ? 840 : 240) + ((540) - (j ? 840 : 240)) * u, y = 986 + (1080 - 986) * u - Math.sin(Math.PI * u) * 60 + (i && i < n ? (R() - 0.5) * 46 : 0);
+            d += `${i ? 'L' : 'M'}${f2(x + (i && i < n ? (R() - 0.5) * 20 : 0))},${f2(y)} `;
+          }
+          a.glow.setAttribute('d', d); a.core.setAttribute('d', d);
+          a.glow.setAttribute('opacity', 0.3); a.core.setAttribute('opacity', f2(0.7 + 0.3 * rng(k)()));
+        });
+        const v = live ? 0.8 + 0.2 * Math.sin(TAU * t * 9) : 0.35;
+        g1.setAttribute('opacity', f2(v)); g2.setAttribute('opacity', f2(v));
+        const tw2 = live ? 10 * Math.sin(TAU * t * 6) : 0;
+        twitch.setAttribute('d', `M620,1086 L660,${f2(1078 - tw2)} L676,${f2(1066 - tw2 * 1.4)}`);
+      });
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.35);
+      // bubbling flasks on the bench
+      const bench = el('g');
+      el('rect', { x: 820, y: 1150, width: 240, height: 12, fill: T.sil }, bench);
+      for (const [x, h, c, ph] of [[860, 70, '#9BE07A', 0], [920, 96, '#7DF9FF', 1.3], [985, 60, '#FF7AD0', 2.4]]) {
+        const glow = el('circle', { cx: x, cy: 1150 - h * 0.35, r: h, fill: url('accentGlow') }, bench);
+        el('path', { d: `M${x - 7},${1150 - h} L${x - 7},${1150 - h * 0.55} L${x - 26},1150 L${x + 26},1150 L${x + 7},${1150 - h * 0.55} L${x + 7},${1150 - h}Z`, fill: '#0E1A26', stroke: '#9FC8E0', 'stroke-width': 2 }, bench);
+        el('path', { d: `M${x - 18},${1150 - h * 0.22} L${x + 18},${1150 - h * 0.22} L${x + 25},1148 L${x - 25},1148Z`, fill: c, opacity: 0.85 }, bench);
+        const bub = [0, 1, 2].map(() => el('circle', { r: 3, fill: c }, bench));
+        anim.push(t => {
+          glow.setAttribute('opacity', f2(0.5 + 0.3 * Math.sin(TAU * t / 1.5 + ph)));
+          bub.forEach((b, i) => { const u = (t / 1.6 + i / 3 + ph) % 1; b.setAttribute('cx', f2(x + 4 * Math.sin(u * 9 + i))); b.setAttribute('cy', f2(1150 - h - u * 50)); b.setAttribute('opacity', f2(1 - u)); });
+        });
+      }
+    }
+
+    function sceneRooftops() {
+      // far skyline with a clock tower
+      const R = rng(717);
+      const sky = el('g', { fill: T.far });
+      for (let x = -1400; x < W + 1400;) {
+        const w = 60 + R() * 90, h = 70 + R() * 130;
+        if (x > 120 && x < 260) { x = 260; continue; }
+        el('rect', { x: f2(x), y: f2(960 - h), width: f2(w), height: f2(h + 60) }, sky);
+        if (R() < 0.35) el('path', { d: `M${f2(x + w * 0.3)},${f2(960 - h)} L${f2(x + w * 0.5)},${f2(960 - h - 50)} L${f2(x + w * 0.7)},${f2(960 - h)}Z` }, sky);
+        x += w + 4;
+      }
+      const ct = el('g', { fill: T.far });
+      el('path', { d: 'M140,1000 L140,640 L240,640 L240,1000Z M130,646 L190,540 L250,646Z M190,540 L190,500' }, ct);
+      el('circle', { cx: 190, cy: 700, r: 36, fill: '#F6DDA6', opacity: 0.85 }, ct);
+      const hands = el('g', { stroke: T.far, 'stroke-width': 4, 'stroke-linecap': 'round' }, ct);
+      const hh = el('path', {}, hands), mh = el('path', {}, hands);
+      anim.push(t => {
+        const m = (t * 6) % 360, h = 330 + t * 0.5;
+        mh.setAttribute('d', `M190,700 L${f2(190 + 28 * Math.sin(m * Math.PI / 180))},${f2(700 - 28 * Math.cos(m * Math.PI / 180))}`);
+        hh.setAttribute('d', `M190,700 L${f2(190 + 18 * Math.sin(h * Math.PI / 180))},${f2(700 - 18 * Math.cos(h * Math.PI / 180))}`);
+      });
+      fogBand(950, 6, 19, 70, 16, 0.7);
+      // nearer rooftops with lit windows and smoking chimneys
+      const row = el('g', { fill: T.back });
+      const roofs = [[-400, 380, 1010, 'gable'], [-20, 230, 980, 'gable'], [210, 200, 1000, 'flat'], [410, 260, 960, 'gable'], [670, 190, 990, 'mansard'], [860, 260, 970, 'gable'], [1120, 420, 1000, 'flat']];
+      const chims = [];
+      for (const [x, w, y, kind] of roofs) {
+        el('rect', { x, y, width: w, height: 300 }, row);
+        if (kind === 'gable') el('path', { d: `M${x - 10},${y + 2} L${x + w / 2},${y - w * 0.32} L${x + w + 10},${y + 2}Z` }, row);
+        if (kind === 'mansard') el('path', { d: `M${x - 8},${y + 2} L${x + 20},${y - 60} L${x + w - 20},${y - 60} L${x + w + 8},${y + 2}Z` }, row);
+        const cx = x + w * 0.72, cy = kind === 'gable' ? y - w * 0.32 * 0.45 : y - (kind === 'mansard' ? 60 : 0);
+        el('rect', { x: cx - 12, y: cy - 50, width: 24, height: 60 }, row);
+        el('rect', { x: cx - 16, y: cy - 56, width: 32, height: 9 }, row);
+        chims.push([cx, cy - 56]);
+        for (let i = 0; i < Math.floor(w / 60); i++) {
+          const wx = x + 34 + i * 60;
+          if (R() < 0.6) { lightWindow(wx, y + 30, 20, 34, row, windows); windows[windows.length - 1].base = 0.55 + R() * 0.4; }
+          if (R() < 0.4) { lightWindow(wx, y + 100, 20, 34, row, windows); windows[windows.length - 1].base = 0.5 + R() * 0.4; }
+        }
+      }
+      flickerWindows();
+      const smoke = [];
+      for (const [cx, cy] of chims.filter(c => c[0] > -100 && c[0] < W + 100)) for (let i = 0; i < 4; i++) smoke.push({ n: el('ellipse', { fill: url('fog') }), cx, cy, p: 5 + (cx % 3), ph: i / 4 });
+      anim.push(t => {
+        for (const s of smoke) {
+          const u = (t / s.p + s.ph) % 1;
+          s.n.setAttribute('cx', f2(s.cx + u * 70 + 8 * Math.sin(u * TAU)));
+          s.n.setAttribute('cy', f2(s.cy - u * 160));
+          s.n.setAttribute('rx', f2(18 + u * 60)); s.n.setAttribute('ry', f2(10 + u * 26));
+          s.n.setAttribute('opacity', f2(Math.min(1, u * 6) * (1 - u) * 1.4));
+        }
+      });
+      // our rooftop: a long ridge the cat walks along
+      el('path', { d: `M${-XMAX},1110 L${W + XMAX},1086 L${W + XMAX},1300 L${-XMAX},1300Z`, fill: T.mid });
+      const tiles = el('g', { stroke: T.sil, 'stroke-width': 2, opacity: 0.7 });
+      for (let x = -40; x < W + 60; x += 46) el('path', { d: `M${x},${f2(1112 - x * 0.022)} L${x - 30},1300` }, tiles);
+      el('path', { d: `M${-XMAX},1104 L${W + XMAX},1080 L${W + XMAX},1094 L${-XMAX},1118Z`, fill: T.sil });
+      // weathervane rooster turning
+      const vane = el('g', { fill: T.sil, stroke: T.sil });
+      el('path', { d: 'M950,1090 L950,980', 'stroke-width': 4 }, vane);
+      const cock = el('path', { d: 'M-30,0 L-10,-6 C-6,-24 6,-30 14,-22 L22,-26 L18,-16 C26,-8 24,6 12,8 L-6,6 L-30,12Z', stroke: 'none' }, vane);
+      anim.push(t => cock.setAttribute('transform', `translate(950,976) scale(${f2(Math.cos(TAU * t / 9))},1)`));
+      // the black cat prowls the ridge, stops, looks at us, prowls on
+      const cat = el('g', { fill: T.sil });
+      const tail = el('path', { fill: 'none', stroke: T.sil, 'stroke-width': 7, 'stroke-linecap': 'round' }, cat);
+      el('path', { d: 'M-46,-34 C-46,-52 -20,-58 10,-56 C30,-56 44,-50 46,-38 L44,-26 C30,-22 -30,-22 -44,-26Z' }, cat);
+      const legs = [-36, -22, 26, 38].map(() => el('path', { fill: 'none', stroke: T.sil, 'stroke-width': 7, 'stroke-linecap': 'round' }, cat));
+      const head = el('g', {}, cat);
+      el('path', { d: 'M0,0 C-2,-14 6,-22 16,-22 C26,-22 32,-14 30,0 C28,8 4,8 0,0Z M2,-14 L4,-32 L12,-20Z M24,-20 L30,-32 L30,-14Z' }, head);
+      const eyes = el('g', { fill: '#C8FF6A' }, head);
+      el('ellipse', { cx: 10, cy: -8, rx: 3, ry: 3.4 }, eyes); el('ellipse', { cx: 21, cy: -8, rx: 3, ry: 3.4 }, eyes);
+      anim.push(t => {
+        const P = 18, c = t % P;
+        let u, walking;
+        if (c < 7) { u = c / 7 * 0.5; walking = true; } else if (c < 9.5) { u = 0.5; walking = false; } else { u = 0.5 + (c - 9.5) / 8.5 * 0.5; walking = true; }
+        const x = -120 + u * 1320, y = 1104 - x * 0.022;
+        const ph = TAU * t * 1.6;
+        [-36, -22, 26, 38].forEach((lx, i) => {
+          const sw = walking ? 9 * Math.sin(ph + (i % 2 ? Math.PI : 0) + (i > 1 ? 1 : 0)) : 0;
+          legs[i].setAttribute('d', `M${lx},-30 L${f2(lx + sw)},-2`);
+        });
+        const look = walking ? 0 : Math.sin(Math.PI * (c - 7) / 2.5);
+        head.setAttribute('transform', `translate(${f2(40 - 6 * look)},${f2(-50 - 4 * look)}) rotate(${f2(-8 * look)})`);
+        eyes.setAttribute('opacity', (t % 4.4) > 4.25 ? 0.1 : 1);
+        const s = Math.sin(TAU * t / 2.4);
+        tail.setAttribute('d', `M-44,-40 C-70,-46 ${f2(-80 + 10 * s)},-80 ${f2(-66 + 18 * s)},${f2(-104 - 6 * s)}`);
+        cat.setAttribute('transform', `translate(${f2(x)},${f2(y - 4 - (walking ? 2 * Math.abs(Math.sin(ph)) : 0))}) scale(1.8)`);
+      });
+      foreground();
+      fogBand(1168, 6, 11, 90, 18, 0.3);
+    }
+
+    ({ manor: sceneManor, witch: sceneWitch, patch: scenePatch, grave: sceneGrave, vamp: sceneVamp, forest: sceneForest, ship: sceneShip, carnival: sceneCarnival,
+       skeleton: sceneSkeleton, mummy: sceneMummy, wolf: sceneWolf, lab: sceneLab, rooftops: sceneRooftops })[theme]();
 
     /* ---------- cobwebs + spider ---------- */
     const cornerL = el('g'), cornerR = el('g');
